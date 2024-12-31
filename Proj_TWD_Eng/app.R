@@ -5,6 +5,8 @@ library(stringi)
 library(plotly)
 library(heatmaply)
 library(tidyr)
+library(ggrepel)
+library(shinycssloaders)
 
 ui <- fluidPage(
   titlePanel("League of Stats"),
@@ -13,7 +15,7 @@ ui <- fluidPage(
     tabPanel("Tab 1",
 
              fluidRow(
-               column(6, align = "center",
+               column(3, align = "center",
                       sliderInput(inputId = "date_range1",
                                   label = "Choose date range:",
                                   min = as.Date("2024-10-31"),
@@ -22,23 +24,42 @@ ui <- fluidPage(
                                   timeFormat = "%d-%m-%Y"),
                       selectInput("dataset1",
                                   "Choose player:",
-                                  choices = c("Gracz1", "Gracz2", "ProGracz1"),
-                                  selected = "Gracz1"),
+                                  choices = c("Player1", "Player2", "Proplayer"),
+                                  selected = "Player1"),
                       selectInput("position1",
                                   "Choose position:",
                                   choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
                                   selected = "All")
+               ),
+             
+               column(9,
+                      #plotlyOutput("plot1", height = "400px")),
+               
+               shinycssloaders::withSpinner(plotlyOutput("plot5", height = "400px"),
+                                            type = getOption("spinner.type", default = 5),
+                                            color = getOption("spinner.color", default = '#73ea13'),
+                                            size = getOption("spinner.size", default = 1.5))
                )
              ),
              fluidRow(
-               column(12, plotlyOutput("plot1", height = "400px"))
-             ),
-             fluidRow(
-               column(12, plotlyOutput("plot3", height = "400px"))
-             ),
-             fluidRow(
-               column(12, plotlyOutput("plot4", height = "400px"))
+               column(9, 
+                      #plotlyOutput("plot3", height = "400px"),
+                      shinycssloaders::withSpinner(plotlyOutput("plot3", height = "400px"),
+                                                   type = getOption("spinner.type", default = 6),
+                                                   color = getOption("spinner.color", default = 'blue'),
+                                                   size = getOption("spinner.size", default = 1.5))
+                      ),
+             
+               column(3, 
+                      #plotlyOutput("plot4", height = "400px")
+                      shinycssloaders::withSpinner(plotlyOutput("plot4", height = "400px"),
+                                                   type = getOption("spinner.type", default = 7),
+                                                   color = getOption("spinner.color", default = 'orange'),
+                                                   size = getOption("spinner.size", default = 1.5))
+                      )
              )
+             
+             
     ),
     
     tabPanel("Tab 2",
@@ -52,8 +73,8 @@ ui <- fluidPage(
                                   timeFormat = "%d-%m-%Y"),
                       selectInput("dataset2",
                                   "Choose player:",
-                                  choices = c("Gracz1", "Gracz2", "ProGracz1"),
-                                  selected = "Gracz1"),
+                                  choices = c("Player1", "Player2", "Proplayer"),
+                                  selected = "Player1"),
                       selectInput("position2",
                                   "Choose position:",
                                   choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
@@ -66,7 +87,7 @@ ui <- fluidPage(
              ),
 
              fluidRow(
-               column(12, plotlyOutput("plot5", height = "400px"))
+               column(12, plotlyOutput("plot1", height = "400px"))
              )
     ),
     tabPanel("Tab 3",
@@ -80,8 +101,8 @@ ui <- fluidPage(
                                   timeFormat = "%d-%m-%Y"),
                       selectInput("dataset3",
                                   "Choose player:",
-                                  choices = c("Gracz1", "Gracz2", "ProGracz1"),
-                                  selected = "Gracz1"),
+                                  choices = c("Player1", "Player2", "ProPlayer"),
+                                  selected = "Player1"),
                       selectInput("position3",
                                   "Choose position:",
                                   choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
@@ -105,8 +126,8 @@ ui <- fluidPage(
                                   timeFormat = "%d-%m-%Y"),
                       selectInput("dataset4",
                                   "Choose player:",
-                                  choices = c("Gracz1", "Gracz2", "ProGracz1"),
-                                  selected = "Gracz1"),
+                                  choices = c("Player1", "Player2", "Proplayer"),
+                                  selected = "Player1"),
                       selectInput("position4",
                                   "Choose position:",
                                   choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
@@ -127,15 +148,19 @@ ui <- fluidPage(
   )
 )
 
+
+
+
+
 server <- function(input, output) {
 
   dataset1 <- reactive({
-    nazwa_csv <- paste0(input$dataset1,".csv")
+    nazwa_csv <- paste0(input$dataset2,".csv")
     data <- read.csv(nazwa_csv)
     data <- data %>%
       filter(
-        Date >= as.POSIXct(as.character(input$date_range1[1]), "%Y-%m-%d"),
-        Date <= as.POSIXct(as.character(input$date_range1[2]), "%Y-%m-%d"),
+        Date >= as.POSIXct(as.character(input$date_range2[1]), "%Y-%m-%d"),
+        Date <= as.POSIXct(as.character(input$date_range2[2]), "%Y-%m-%d"),
         if (input$position1 != "All") {
           Position == input$position1
         } else {
@@ -172,7 +197,7 @@ server <- function(input, output) {
       )
     
     ggplotly(plot)
-  })
+  }) 
   
 
   dataset2 <- reactive({
@@ -305,7 +330,7 @@ server <- function(input, output) {
   })
   
   dataset5 <- reactive({
-    nazwa_csv <- paste0(input$dataset2, ".csv")
+    nazwa_csv <- paste0(input$dataset1, ".csv")
     data <- read.csv(nazwa_csv)
     
     data <- data %>%
@@ -315,8 +340,8 @@ server <- function(input, output) {
         win = ifelse(Win == "True", 1, 0)
       ) %>%
       filter(
-        Date >= as.POSIXct(as.character(input$date_range2[1]), "%Y-%m-%d"),
-        Date <= as.POSIXct(as.character(input$date_range2[2]), "%Y-%m-%d"),
+        Date >= as.POSIXct(as.character(input$date_range1[1]), "%Y-%m-%d"),
+        Date <= as.POSIXct(as.character(input$date_range1[2]), "%Y-%m-%d"),
         if (input$position2 != "All") {
           Position == input$position2
         } else {
@@ -363,7 +388,8 @@ server <- function(input, output) {
       )
     
     ggplotly(plot5)
-  })
+  }) #|> 
+    #bindCache(input$date_range1)
 
   dataset6 <- reactive({
     nazwa_csv <- paste0(input$dataset3, ".csv")
