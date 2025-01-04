@@ -283,7 +283,8 @@ server <- function(input, output) {
         plot.title = element_text(size = 16)  
       )
     ggplotly(plot3)
-  })
+  }) |>
+    bindCache(input$dataset1, input$date_range1, input$position1)
   
   dataset4 <- reactive({
     nazwa_csv <- paste0(input$dataset1,".csv")
@@ -327,7 +328,8 @@ server <- function(input, output) {
              titlefont = list(size = 16))
     
     pie_chart
-  })
+  }) |>
+    bindCache(input$dataset1, input$date_range1, input$position1)
   
   dataset5 <- reactive({
     nazwa_csv <- paste0(input$dataset1, ".csv")
@@ -342,13 +344,14 @@ server <- function(input, output) {
       filter(
         Date >= as.POSIXct(as.character(input$date_range1[1]), "%Y-%m-%d"),
         Date <= as.POSIXct(as.character(input$date_range1[2]), "%Y-%m-%d"),
-        if (input$position2 != "All") {
-          Position == input$position2
+        if (input$position1 != "All") {
+          Position == input$position1
         } else {
           TRUE
         } 
       ) %>%
-      mutate(Pings = allInPings + assistMePings + commandPings + enemyMissingPings + enemyVisionPings + getBackPings + needVisionPings + onMyWayPings + pushPings + visionClearedPings) %>%
+      mutate(Pings = allInPings + assistMePings + commandPings + enemyMissingPings + 
+               enemyVisionPings + getBackPings + needVisionPings + onMyWayPings + pushPings + visionClearedPings) %>%
       
       
       mutate(Pings_group = cut(Pings, 
@@ -374,7 +377,7 @@ server <- function(input, output) {
     
     plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio)) +
       geom_point() + 
-      geom_smooth(method = "lm", se = FALSE, color = "blue") + 
+      #geom_smooth(method = "lm", se = FALSE, color = "blue") + 
       labs(
         title = paste("Winrate by number of pings"),
         x = "Number of pings",
@@ -388,8 +391,8 @@ server <- function(input, output) {
       )
     
     ggplotly(plot5)
-  }) #|> 
-    #bindCache(input$date_range1)
+  }) |>
+    bindCache(input$dataset1, input$date_range1, input$position1)
 
   dataset6 <- reactive({
     nazwa_csv <- paste0(input$dataset3, ".csv")
