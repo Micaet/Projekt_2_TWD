@@ -391,9 +391,6 @@ server <- function(input, output) {
     )
   })
   
-  
-  
-  
   DensityPlotsData <- reactive({
     nazwa_csv <- paste0(input$dataset4, ".csv")
     data <- read.csv(nazwa_csv)
