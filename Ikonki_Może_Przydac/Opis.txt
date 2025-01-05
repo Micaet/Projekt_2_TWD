@@ -1,0 +1,6 @@
+1. Obramówki, można użyć jako obramowanie wykresów, slajderów itp.
+2.Tła - oficjalne tło w plikach ligi może się przydać ale nie wiem jak to będzie wyglądać w dashboardzie
+3. Małe ikony - można pododawać jako takie małe smaczki ale to jak zobaczymy na czym dokładnie stoimi i jak to wygląda
+4. Duże ikony przydadzą się na pewno na "tytułowej" stronie żeby napisać o nas i ProGraczu. Zaznaczą też różniczę w poziomie dla zorientowanych
+5.Gif loadingu i kursor wiadomo
+6. Jeszcze zapożyczyłem ikonkę "L" ligi oraz dodatkowe "złote paski:
