@@ -9,6 +9,12 @@ library(ggrepel)
 library(shinycssloaders)
 
 
+choose_colour <- function(input) {
+  ifelse(input == "Player1", "#005b92", 
+         ifelse(input == "Player2", "#fc6a53", "#4F6F49")) #    "#f7bb45", "#c89b3c" - naj "#f0e6d2"
+} 
+  
+
 filter_data <- function(df, date_range, position_filter) {
   
   df <- df %>%
@@ -46,78 +52,79 @@ add_custom_theme <- function(plot, x_label = NULL, y_label = NULL, plot_title = 
   return(plot)
 }
 
+sliders_select_input <- function(input_number){
+x <-list(tags$div(class = "slider-custom", sliderInput(inputId = paste0("date_range", input_number),
+                  label = "Choose date range:",
+                  min = as.Date("2024-09-01"),
+                  max = as.Date("2024-12-30"),
+                  value = c(as.Date("2024-09-01"), as.Date("2024-12-30")),
+                  timeFormat = "%d-%m-%Y")),
+      selectInput(paste0("dataset", input_number),
+                  "Choose player:",
+                  choices = c("Player1", "Player2", "Proplayer"),
+                  selected = "Player1"),
+      selectInput(paste0("position", input_number),
+                  "Choose position:",
+                  choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
+                  selected = "All"))
+}
 
-ui <- fluidPage(
-  titlePanel("League of Stats"),
+apply_spinner <- function(plot_name, spinner_type, colour, height = "400px"){
+  shinycssloaders::withSpinner(plotlyOutput(plot_name, height = height),
+                               type = getOption("spinner.type", default = spinner_type),
+                               color = getOption("spinner.color", default = colour),
+                               size = getOption("spinner.size", default = 1.5))
+}
 
-  tabsetPanel(
+
+ui <- navbarPage(
+  title = tags$div("League of Stats"), #titlePanel("League of Stats"),
+
+  #tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: #f0e6d2}")),
+  tags$head(
+    tags$style(HTML("
+      .slider-custom .irs-bar {
+        background-color: #f0e6d2;
+        border-top-color: #f0e6d2;
+        border-bottom-color: #f0e6d2;
+      }
+      .slider-custom .irs-from, .slider-custom .irs-to, .slider-custom .irs-single {
+        background-color: #c89b3c;
+      }
+      .slider-custom .irs-handle {
+        background-color: #c89b3c;
+        border-color: #c89b3c;
+      }
+    "))
+  ),
+  
+  #tabsetPanel(
     tabPanel("Tab 1",
 
              fluidRow(
                column(3, align = "center",
-                      sliderInput(inputId = "date_range1",
-                                  label = "Choose date range:",
-                                  min = as.Date("2024-10-31"),
-                                  max = as.Date("2024-12-18"),
-                                  value = c(as.Date("2024-10-31"), as.Date("2024-12-18")),
-                                  timeFormat = "%d-%m-%Y"),
-                      selectInput("dataset1",
-                                  "Choose player:",
-                                  choices = c("Player1", "Player2", "Proplayer"),
-                                  selected = "Player1"),
-                      selectInput("position1",
-                                  "Choose position:",
-                                  choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
-                                  selected = "All")
+                      sliders_select_input(1)
                ),
              
                column(9,
-                      #plotlyOutput("plot1", height = "400px")),
-               
-               shinycssloaders::withSpinner(plotlyOutput("ScatterPlotPings", height = "400px"),
-                                            type = getOption("spinner.type", default = 5),
-                                            color = getOption("spinner.color", default = '#73ea13'),
-                                            size = getOption("spinner.size", default = 1.5))
+                      apply_spinner("ScatterPlotPings", 5, '#73ea13')
                )
              ),
              fluidRow(
-               column(9, 
-                      #plotlyOutput("plot3", height = "400px"),
-                      shinycssloaders::withSpinner(plotlyOutput("BarPlotWinRate", height = "400px"),
-                                                   type = getOption("spinner.type", default = 6),
-                                                   color = getOption("spinner.color", default = 'blue'),
-                                                   size = getOption("spinner.size", default = 1.5))
+               column(9,
+                      apply_spinner("BarPlotWinRate", 6, 'blue')
                       ),
              
                column(3, 
-                      #plotlyOutput("plot4", height = "400px")
-                      shinycssloaders::withSpinner(plotlyOutput("PieChartWinRate", height = "400px"),
-                                                   type = getOption("spinner.type", default = 7),
-                                                   color = getOption("spinner.color", default = 'orange'),
-                                                   size = getOption("spinner.size", default = 1.5))
+                      apply_spinner("PieChartWinRate", 7, 'orange')
                       )
              )
-             
-             
     ),
     
     tabPanel("Tab 2",
              fluidRow(
                column(6, align = "center",
-                      sliderInput(inputId = "date_range2",
-                                  label = "Choose date range:",
-                                  min = as.Date("2024-09-01"),
-                                  max = as.Date("2024-12-30"),
-                                  value = c(as.Date("2024-09-01"), as.Date("2024-12-30")),
-                                  timeFormat = "%d-%m-%Y"),
-                      selectInput("dataset2",
-                                  "Choose player:",
-                                  choices = c("Player1", "Player2", "Proplayer"),
-                                  selected = "Player1"),
-                      selectInput("position2",
-                                  "Choose position:",
-                                  choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
-                                  selected = "All")
+                      sliders_select_input(2)
                )
              ),
 
@@ -132,20 +139,7 @@ ui <- fluidPage(
     tabPanel("Tab 3",
              fluidRow(
                column(6, align = "center",
-                      sliderInput(inputId = "date_range3",
-                                  label = "Choose date range:",
-                                  min = as.Date("2024-09-01"),
-                                  max = as.Date("2024-12-30"),
-                                  value = c(as.Date("2024-09-01"), as.Date("2024-12-30")),
-                                  timeFormat = "%d-%m-%Y"),
-                      selectInput("dataset3",
-                                  "Choose player:",
-                                  choices = c("Player1", "Player2", "ProPlayer"),
-                                  selected = "Player1"),
-                      selectInput("position3",
-                                  "Choose position:",
-                                  choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
-                                  selected = "All")
+                      sliders_select_input(3)
                )
              ),
              
@@ -157,20 +151,7 @@ ui <- fluidPage(
              
              fluidRow(
                column(6, align = "center",
-                      sliderInput(inputId = "date_range4",
-                                  label = "Choose date range:",
-                                  min = as.Date("2024-10-31"),
-                                  max = as.Date("2024-12-18"),
-                                  value = c(as.Date("2024-10-31"), as.Date("2024-12-18")),
-                                  timeFormat = "%d-%m-%Y"),
-                      selectInput("dataset4",
-                                  "Choose player:",
-                                  choices = c("Player1", "Player2", "Proplayer"),
-                                  selected = "Player1"),
-                      selectInput("position4",
-                                  "Choose position:",
-                                  choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
-                                  selected = "All")
+                      sliders_select_input(4)
                )
              ),
              fluidRow(
@@ -182,9 +163,25 @@ ui <- fluidPage(
              fluidRow(
                column(12, plotlyOutput("DensityGold", height = "400px"))
              )
-    )
+    ),
+  footer = shiny::HTML("
+                <footer class='text-center text-sm-start' style='width:100%;'>
+                <hr>
+                <p class='text-center' style='font-size:20px;'>
+                  About project
+                </p>
+                <p class='text-center' style='font-size:18px;'>
+                  Authors: MB, RC, MS
+                </p>
+                <p class='text-center' style='font-size:16px;'>
+                  Source of data:
+                  <a class='text-dark' href='https://developer.riotgames.com/'>RiotGames API</a>
+                </p>
+                </footer>
+              "),
+  #header = tags$head(tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"))
     
-  )
+  #)
 )
 
 
@@ -209,7 +206,7 @@ server <- function(input, output) {
     data <- BarPlotGamesData()
     total_games <- sum(data$n)
     plot <- ggplot(data, aes(x = Date, y = n)) +
-      geom_col(fill = "#6D98BA") 
+      geom_col(fill = choose_colour(input$dataset2)) 
    plot<- add_custom_theme(plot,"Date","Number of games",paste("Games per day       ", "             Total number of games:", total_games))
     
     ggplotly(plot)
@@ -228,7 +225,7 @@ server <- function(input, output) {
   output$BarPlotChampion <- renderPlotly({
     data <- BarPlotChampionData()
     plot2 <- ggplot(data, aes(x = Champion, y = n)) +
-      geom_col(fill = "#A1C9A1") 
+      geom_col(fill = choose_colour(input$dataset2)) 
       plot2<- add_custom_theme(plot2,"Champions","Number of games","Games on champion")
     ggplotly(plot2)
   })
@@ -256,7 +253,7 @@ server <- function(input, output) {
   output$BarPlotWinRate <- renderPlotly({
     data <- BarPlotWinRateData()
     plot3 <- ggplot(data, aes(x = Day, y = win_ratio)) +
-      geom_col(fill = "#D4A5A5")
+      geom_col(fill = choose_colour(input$dataset1))
     plot3<- add_custom_theme(plot3,"Day","Winrate","Winrate in each day")
     ggplotly(plot3)
   }) |>
@@ -331,7 +328,7 @@ server <- function(input, output) {
     data <- ScatterPlotPingsData()
     
     plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio)) +
-    geom_point() 
+    geom_point(color = choose_colour(input$dataset1)) 
     plot5<- add_custom_theme(plot5,"Number of pings","Winrate","Winrate by number of pings")
     
     ggplotly(plot5)
@@ -377,13 +374,16 @@ server <- function(input, output) {
       spread(key = week, value = game_count, fill = 0)
 
     data_matrix <- as.matrix(data_matrix[, -1])
+    
     heatmaply(
       data_matrix,
+      limits = c(0, 16),
       xlab = "Week", 
       ylab = "Day of week", 
       main = "Number of games heatmap",
       dendrogram = "none", 
-      scale_fill = "Viridis", 
+      #scale_fill = "Viridis",
+      colors = list("#e9e6d2",choose_colour(input$dataset3)),
       showticklabels = c(TRUE, TRUE), 
       labRow = c("Mon", "Tues", "Wen", "Thurs", "Fri", "Sat", "Sun"),
       color = c("white", "red"), 
@@ -408,7 +408,7 @@ server <- function(input, output) {
   output$DensityDuration <- renderPlotly({
     data <- DensityPlotsData()
     plot9 <- ggplot(data, aes(x = gameLength)) +
-      geom_density()
+      geom_density(fill = choose_colour(input$dataset4))
     plot9<- add_custom_theme(plot9,"Game duration","Density","Game Duration")
     ggplotly(plot9)
   })
@@ -417,7 +417,7 @@ server <- function(input, output) {
     data <- DensityPlotsData()
     
     plot7 <- ggplot(data, aes(x = goldPerMinute)) +
-      geom_density()
+      geom_density(fill = choose_colour(input$dataset4))
     plot7<- add_custom_theme(plot7,"Gold per minute","Density","Gold per minute")
     ggplotly(plot7)
   })
@@ -425,7 +425,7 @@ server <- function(input, output) {
   output$DensityDamage <- renderPlotly({
     data <- DensityPlotsData()
     plot8 <- ggplot(data, aes(x = damagePerMinute)) +
-      geom_density()
+      geom_density(fill = choose_colour(input$dataset4))
     plot8<- add_custom_theme(plot8,"Damage per minute","Density","Damage per minute")
     ggplotly(plot8)
   })
@@ -433,9 +433,3 @@ server <- function(input, output) {
 }
 
 shinyApp(ui = ui, server = server)
-
-
-
-
-
-
