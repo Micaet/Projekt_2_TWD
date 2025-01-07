@@ -6,8 +6,6 @@
   --bg_d: #020a12;
 }
 
-
-
 * {
   margin: 0;
   padding: 0;
@@ -16,12 +14,16 @@
 
 body {
   background-color: #181d24;
-  font-family: "SpiegelRegular";
+  font-family: "Spiegel";
   font-size: 16pt;
   line-height: 20pt;
   color: #c89b3c;
   text-rendering: optimizelegibility;
   cursor: url("cursor.png"), auto;
+}
+
+.placeholder{
+  height: 50px;
 }
 
 a,
@@ -31,15 +33,68 @@ button,
 }
 
 label {
+  cursor: url("cursor.png"), auto;
+}
+
+.js-plotly-plot .plotly,
+.js-plotly-plot .plotly div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Spiegel";
+}
+
+.container-fluid {
+  display: inherit;
+  width: 100%;
+  background-color: var(--bg);
+}
+
+.checkbox {
+  color: var(--gold_b);
+cursor: url("cursor-pointer.png"), auto;
+}
+
+.checkbox label, .radio label {
   cursor: url("cursor-pointer.png"), auto;
 }
 
+.custom-checkbox input[type="checkbox"]:before {
+  border: 2px solid;
+  color: var(--wh);
+  background-color: var(--bg);
+  content: "";
+  height: 15px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 15px;
+cursor: url('cursor-pointer.png'), auto;
+}
+
+.custom-checkbox input[type="checkbox"]:checked:after {
+  color: var(-g);
+  background-color: var(--bg);
+    content: "✓";
+  font-size: medium;
+  vertical-align: middle;
+  height: 15px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 15px;
+cursor: url('cursor-pointer.png'), auto;
+}
+
+
+
+
 .selectize-input.items.full.has-options.has-items {
   font-family: "Beaufort";
-  font-size: 16px;
+  font-size: 16pt;
   font-weight: bold;
   background-image: var(--bg);
-  color: var(--g);
+  color: var(--wh);
 border-image-slice: 1;
   border-width: 0px;
 border-radius: 0px;
@@ -73,7 +128,7 @@ border-color: var(--g) var(--g) var(--g) var(--g);
 
 .updatemenu-button,
 .selectize-input.items.full.has-options.has-items:active {
-  color: var(--g);
+  color: var(--wh);
 }
 
 .selectize-input.items.full.has-options.has-items:hover {
@@ -85,7 +140,7 @@ box-shadow: inset 0 0 2px var(--bg);
 .selectize-dropdown .selected {
   cursor: url("cursor-pointer.png"), auto;
 background: var(--bg);
-color: var(--g)
+color: var(--wh)
 }
 
 .selectize-dropdown .active {
@@ -107,7 +162,7 @@ background: var(--bg)
 .option {
   font-family: "Beaufort";
   background: var(--bg);
-  color: var(--g);
+  color: var(--wh);
 }
 
 .selectize-dropdown-content {
@@ -125,11 +180,10 @@ border-image-slice: 1;
 border-radius: 0px;
 }
 
-
 .control-label {
   font-family: "Beaufort";
-  font-size: 16pt;
-  line-height: 20pt;
+  font-size: 20pt;
+  line-height: 22pt;
   color: #c89b3c;
 background: var(--bg)
 }
@@ -158,17 +212,32 @@ font-family: 'Beaufort'; color: #f0e6d2; bottom: 1px; z-index: 1;
 cursor: url('cursor-pointer.png'), auto;
 }
 
-.container-fluid {
-  background-color: var(--bg);
+
+
+
+
+
+
+.app-title {
+  display: ruby-text !important;
+  font-family: "Beaufort";
+  font-size: 43pt;
+  line-height: 45pt;
+  color: var(--gold_b);
+text-align: center;
+white-space: nowrap;
 }
 
-
-
+.app-title-icon {
+  height: 50;
+vertical-align: middle;
+}
 
 
 .navbar {
   display: flex;
   background-color: var(--bg);
+  height: 80px;
 }
 
 .navbar-header {
@@ -178,17 +247,18 @@ cursor: url('cursor-pointer.png'), auto;
 
 .navbar-nav {
   display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+  padding: 0px 16px;
   width: 100%;
-justify-content: flex-end;
-padding: 0px 10px;
-gap: 8px;
 }
 
 .navbar-nav > li > a {
   color: var(--gold_b);
   font-family: "Beaufort";
   width: fit-content;
-  font-size: 16pt;
+  font-size: 16px;
   border-top: 2px solid var(--g);
   border-left: 2px solid var(--g);
 }
@@ -214,7 +284,7 @@ gap: 8px;
   font-family: "Beaufort";
   font-size: 30pt;
   line-height: 32pt;
-  color: var(--wh) !important;
+  color: var(--gold_b) !important;
   transition: 0.3s;
 }
 
@@ -222,3 +292,22 @@ gap: 8px;
   color: var(--g)
   transition: 0.3s;
 }
+
+.dec-l{
+  display: flex;
+  height: 90%;
+  width: 90%;
+  flex-direction: column;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px;
+}
+
+.dec-s{
+  display: flex;
+  width: 80%;
+}
+
+
+
+
