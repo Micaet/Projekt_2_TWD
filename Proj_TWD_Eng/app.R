@@ -40,14 +40,20 @@ filter_data <- function(df, date_range, position_filter) {
 }
 
 
-add_custom_theme <- function(plot, x_label = NULL, y_label = NULL, plot_title = NULL, color = "#c89b3c", angle = 45) {
+add_custom_theme <- function(plot, x_label = NULL, y_label = NULL, plot_title = NULL, 
+                             color = "#c89b3c", angle = 45, if_legend = F) {
+  #add_legend <- ifelse(legend, element_text(size = 12, colour = color), element_blank())
   plot <- plot + 
     theme_minimal() + 
     theme(
-      axis.text.x = element_text(angle = angle, size = 7, colour = color), 
-      axis.title = element_text(size = 14, colour = color), 
-      plot.title = element_text(size = 16, colour = color)
-    )
+      axis.text.x = element_text(angle = angle, size = 7, colour = color, family = "Spiegel"), 
+      axis.title = element_text(size = 14, colour = color, family = "Spiegel"), 
+      plot.title = element_text(hjust = 0.5, size = 16, colour = color, family = "Spiegel")) +
+    {if (if_legend == T) {theme(legend.title = element_text(size = 10, colour = color, family = "Spiegel"),
+      legend.text = element_text(size = 9, colour = color, family = "Spiegel")
+      #legend.key.size = unit(1, 'cm')
+      )}}
+  
   if (!is.null(x_label)) {
     plot <- plot + xlab(x_label)
   }
@@ -67,7 +73,7 @@ change_plotly_labels <- function(plot, main_color = "#c89b3c", bg_color = "#f0e6
     layout(paper_bgcolor = "rgba(0,0,0,0)",
          plot_bgcolor = "rgba(0,0,0,0)",
          xaxis = temp, yaxis = temp,
-         font = list(color = main_color),
+         font = list(color = main_color, family = 'Spiegel'),
          legend = list(bgcolor = 'rgba(17,1d,24,0)')) |>
     config(displayModeBar = FALSE)
   return(plot)
@@ -99,49 +105,33 @@ sliders_select_input <- function(input_number) {
 }
 
 
-apply_spinner <- function(plot_name, spinner_type, colour = "#c89b3c", height = "400px"){
+apply_spinner <- function(plot_name, spinner_type = 1, colour = "#f0e6d2", height = "400px"){
   shinycssloaders::withSpinner(plotlyOutput(plot_name, height = height),
-                               type = getOption("spinner.type", default = spinner_type),
+                               image = list(src = "load01.gif"),
+                               caption = "PLEASE WAIT",
+                               #type = getOption("spinner.type", default = spinner_type),
                                color = getOption("spinner.color", default = colour),
-                               size = getOption("spinner.size", default = 1.5))
+                               size = getOption("spinner.size", default = 0.75)
+                               )
 }
+
+place_holder <- column(12, tags$div(class = 'placeholder'))
 
 
 ui <- navbarPage(
-  title = tags$div("League of Stats"), #titlePanel("League of Stats"),
+  title = tags$div(class = "app-title", span(img(src = "favicon.png")), 'eague of Stats'), #titlePanel("League of Stats"),
 
-  #tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: #f0e6d2}")),
-  header =  tags$head(
-    # tags$style(HTML("
-    #   .slider-custom .irs-bar {
-    #     background-color: #f0e6d2;
-    #     border-top-color: #f0e6d2;
-    #     border-bottom-color: #f0e6d2;
-    #   }
-    #   .slider-custom .irs-from, .slider-custom .irs-to, .slider-custom .irs-single {
-    #     background-color: #c89b3c;
-    #   }
-    #   .slider-custom .irs-handle {
-    #     cursor: url('cursor-pointer.png'), auto;
-    #     background-color: #c89b3c;
-    #     border-color: #c89b3c;
-    #   }
-    #   .slider-custom .irs-grid-text {
-    #   font-family: 'Beaufort'; color: #f0e6d2; bottom: 1px; z-index: 1;
-    #   }
-    #   
-    #   .selector-custom .selectize-dropdown{
-    #   font-family: 'Beaufort'; color: #f0e6d2; font-style: italic; font-weight: bold;
-    #   }
-    # ")),
-    tags$div(class = "slider-custom"),
-    tags$link(rel = "icon", href = "favicon.png"),
-    tags$link(rel = "stylesheet", href = "fonts.css"),
-    tags$link(rel = "stylesheet", href = "styles.css"),
-  ),
+    #header =  tags$head(
+      
+    #),
   
   #tabsetPanel(
     tabPanel("Tab 1",
+             tags$div(class = "slider-custom"),
+             tags$div(class = "custom-checkbox"),
+             tags$link(rel = "icon", href = "favicon.png"),
+             tags$link(rel = "stylesheet", href = "fonts.css"),
+             tags$link(rel = "stylesheet", href = "styles.css"),
 
              fluidRow(
                column(3, align = "center",
@@ -149,16 +139,22 @@ ui <- navbarPage(
                ),
              
                column(9,
-                      apply_spinner("ScatterPlotPings", 5) # '#73ea13')
+                      apply_spinner("ScatterPlotPings") # '#73ea13')
                )
              ),
              fluidRow(
+               place_holder,
+               column(12, align = "center",
+                      tags$img(class = "dec-l", src = "dec_l.png")),
+               place_holder
+             ),
+             fluidRow(
                column(9,
-                      apply_spinner("BarPlotWinRate", 6) # 'blue')
+                      apply_spinner("BarPlotWinRate") # 'blue')
                       ),
              
                column(3, 
-                      apply_spinner("PieChartWinRate", 7) # 'orange')
+                      apply_spinner("PieChartWinRate") # 'orange')
                       )
              )
     ),
@@ -168,7 +164,7 @@ ui <- navbarPage(
                column(3, align = "center",
                       sliders_select_input(2)
                ),
-               column(9, plotlyOutput("BarPlotChampion", height = "400px")),
+               column(9, apply_spinner("BarPlotChampion")),
              ),
 
              fluidRow(
@@ -176,7 +172,7 @@ ui <- navbarPage(
              ),
 
              fluidRow(
-               column(12, plotlyOutput("BarPlotGames", height = "400px"))
+               column(12, apply_spinner("BarPlotGames"))
              )
     ),
     tabPanel("Tab 3",
@@ -187,40 +183,43 @@ ui <- navbarPage(
              ),
              
              fluidRow(
-               column(12, plotlyOutput("Heatmap", height = "600px"))
+               column(12, apply_spinner("Heatmap", height = "600px"))
              )
     ),
   tabPanel("Tab 4",
            fluidRow(
              column(12, align = "center",
-                    checkboxGroupInput(
-                      inputId = "players",
-                      label = "Select Players:",
-                      choices = c("Player1", "Player2", "ProPlayer"),
-                      selected = c("Player1")
+                    tags$div(
+                      class = "custom-checkbox",
+                      checkboxGroupInput(
+                        inputId = "players",
+                        label = "Select Players:",
+                        choices = c("Player1", "Player2", "ProPlayer"),
+                        selected = c("Player1")
+                      )
                     )
              )
            ),
            fluidRow(
-             column(12, plotlyOutput("DensityDuration", height = "400px"))
+             column(12, apply_spinner("DensityDuration"))
            ),
            fluidRow(
-             column(12, plotlyOutput("DensityDamage", height = "400px"))
+             column(12, apply_spinner("DensityDamage"))
            ),
            fluidRow(
-             column(12, plotlyOutput("DensityGold", height = "400px"))
+             column(12, apply_spinner("DensityGold"))
            )
   ),#"#c89b3c", bg_color = "#f0e6d2"
   footer = shiny::HTML("
                 <footer class='text-center text-sm-start' style='width:100%;'>
                 <hr>
-                <p class='text-center' style='font-size:26px;color:#f7bb45;font-family:Beaufort;'>
+                <p class='text-center' style='font-size:26px; color:#f7bb45; font-family:Beaufort;'>
                   About project
                 </p>
-                <p class='text-center' style='font-size:20px;color:#c89b3c;font-family:Beaufort;'>
+                <p class='text-center' style='font-size:20px; color:#c89b3c; font-family:Beaufort;'>
                   Authors: MB, RC, MS
                 </p>
-                <p class='text-center' style='font-size:16px;color:#f0e6d2;font-family:Beaufort;'>
+                <p class='text-center' style='font-size:16px; color:#f0e6d2; font-family:Beaufort;'>
                   Source of data:
                   <a class='text-dark' href='https://developer.riotgames.com/'>RiotGames API</a>
                 </p>
@@ -291,8 +290,15 @@ server <- function(input, output,session) {
                            paste("Games per day       ", "             Total number of games:", total_games))
     
     plot <- ggplotly(plot)
+    plot <- plot |>
+      layout(title = list(
+        text = paste0('Games per day',
+                      '<br>',
+                      '<sup>',
+                      'Total number of games: ', total_games ,'</sup>')))
     change_plotly_labels(plot)
-  }) 
+  }) |>
+    bindCache(input$dataset2, input$date_range2, input$position2)
   
   BarPlotChampionData <- reactive({
     nazwa_csv <- paste0(input$dataset2, ".csv")
@@ -310,10 +316,10 @@ server <- function(input, output,session) {
       arrange(n)
     
     position_colors <- c(
-      "BOTTOM" = "#1f77b4", 
-      "TOP" = "#ff7f0e", 
+      "BOTTOM" = "lightblue", 
+      "TOP" = "#f0e6d2", 
       "JUNGLE" = "#2ca02c", 
-      "UTILITY" = "#d62728", 
+      "UTILITY" = "#ff7f0e", 
       "MIDDLE" = "#9467bd", 
       "MIXED" = "#8c564b"
     )
@@ -339,7 +345,8 @@ server <- function(input, output,session) {
     
     plot <- ggplotly(plot2)
     change_plotly_labels(plot)
-  })
+  }) |>
+    bindCache(input$dataset2, input$date_range2, input$position2)
   
   
   
@@ -518,7 +525,10 @@ server <- function(input, output,session) {
     #   scale_fill_gradient(low = "#e9e6d2", high = choose_colour(input$dataset3), limits = c(0,16)) +
     #   scale_y_discrete(labels = c("Mon", "Tues", "Wen", "Thurs", "Fri", "Sat", "Sun"))
     # add_custom_theme(heatmap, "Week", "Day of week", "Number of games heatmap")
-  })
+  }) |>
+    bindCache(input$dataset3, input$date_range3, input$position3)
+  
+  
   DensityPlotsData <- reactive({
     selected_players <- input$players
     if (length(selected_players) == 0) {
@@ -555,13 +565,13 @@ server <- function(input, output,session) {
     
     plot9 <- ggplot(data, aes(x = gameLength, color = Player, fill = Player)) +
       geom_density(alpha = 0.4) +  
-      scale_fill_manual(values = choose_colour2(input$players)) +
-      scale_color_manual(values = choose_colour2(input$players))+
-      labs(x = "Game Duration", y = "Density", title = "Game Duration Density") +
-      theme_minimal()
+      scale_fill_manual(values = choose_colour2(input$players)) 
+      #scale_color_manual(values = choose_colour2(input$players))+
+    plot9 <- add_custom_theme(plot9, x = "Game Duration", y = "Density", "Game Duration Density",
+                              angle = 0, if_legend = T)
     plot <- ggplotly(plot9)
     change_plotly_labels(plot)
-  })
+  }) 
   
   output$DensityGold <- renderPlotly({
     data <- DensityPlotsData()
@@ -572,10 +582,10 @@ server <- function(input, output,session) {
     
     plot7 <- ggplot(data, aes(x = goldPerMinute, color = Player, fill = Player)) +
       geom_density(alpha = 0.4) + 
-      scale_fill_manual(values = choose_colour2(input$players)) +
-      scale_color_manual(values = choose_colour2(input$players)) +
-      labs(x = "Gold Per Minute", y = "Density", title = "Gold Per Minute Density") +
-      theme_minimal()
+      scale_fill_manual(values = choose_colour2(input$players))
+      #scale_color_manual(values = choose_colour2(input$players)) +
+    plot7 <- add_custom_theme(plot7, x = "Gold Per Minute", y = "Density", "Gold Per Minute Density", 
+                              angle = 0, if_legend = T)
    
     plot <- ggplotly(plot7)
     change_plotly_labels(plot)
@@ -590,10 +600,10 @@ server <- function(input, output,session) {
     
     plot8 <- ggplot(data, aes(x = damagePerMinute, color = Player, fill = Player)) +
       geom_density(alpha = 0.4) + 
-      scale_fill_manual(values = choose_colour2(input$players)) +
-      scale_color_manual(values = choose_colour2(input$players)) +
-      labs(x = "Damage Per Minute", y = "Density", title = "Damage Per Minute Density") +
-      theme_minimal()
+      scale_fill_manual(values = choose_colour2(input$players))
+      #scale_color_manual(values = choose_colour2(input$players)) +
+    plot8 <- add_custom_theme(plot8, x = "Damage Per Minute", y = "Density", "Damage Per Minute Density", 
+                              angle = 0, if_legend = T)
     
     plot <- ggplotly(plot8)
     change_plotly_labels(plot)
