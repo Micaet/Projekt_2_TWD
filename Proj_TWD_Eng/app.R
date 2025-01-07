@@ -16,18 +16,24 @@ choose_colour <- function(input) {
          ifelse(input == "Player2", "#be1e37", "#4F6F49")) #    "#f7bb45", "#c89b3c" - naj "#f0e6d2" - tło
 } 
   
+choose_colour2 <- function(selected_players) {
+  colors <- c(
+    Player1 = "#005b92",
+    Player2 = "#be1e37",
+    ProPlayer = "#4F6F49"
+  )
+  return(colors[selected_players])
+}
 
 filter_data <- function(df, date_range, position_filter) {
-  
+  if (is.null(position_filter) || length(position_filter) == 0) {
+    position_filter <- "All"
+  }
   df <- df %>%
     filter(
       Date >= as.POSIXct(date_range[1], format = "%Y-%m-%d", tz = "UTC"),
       Date <= as.POSIXct(date_range[2], format = "%Y-%m-%d", tz = "UTC"),
-      if (position_filter != "All") {
-        Position == position_filter
-      } else {
-        TRUE
-      }
+      if (position_filter != "All") Position == position_filter else TRUE
     )
   
   return(df)
@@ -64,25 +70,34 @@ change_plotly_labels <- function(plot, main_color = "#c89b3c", bg_color = "#f0e6
          font = list(color = main_color),
          legend = list(bgcolor = 'rgba(17,1d,24,0)')) |>
     config(displayModeBar = FALSE)
+  return(plot)
+  
   
 }
 
-sliders_select_input <- function(input_number){
-x <-list(tags$div(class = "slider-custom", sliderInput(inputId = paste0("date_range", input_number),
-                  label = "Choose date range:",
-                  min = as.Date("2024-09-01"),
-                  max = as.Date("2024-12-30"),
-                  value = c(as.Date("2024-09-01"), as.Date("2024-12-30")),
-                  timeFormat = "%d-%m-%Y")),
-         selectInput(paste0("dataset", input_number),
-                  "Choose player:",
-                  choices = c("Player1", "Player2", "Proplayer"),
-                  selected = "Player1"),
-         selectInput(paste0("position", input_number),
-                  "Choose position:",
-                  choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
-                  selected = "All"))
+sliders_select_input <- function(input_number) {
+  list(
+    tags$div(
+      class = "slider-custom",
+      sliderInput(
+        inputId = paste0("date_range", input_number),
+        label = "Choose date range:",
+        min = as.Date("2024-09-01"),
+        max = as.Date("2024-12-30"),
+        value = c(as.Date("2024-09-01"), as.Date("2024-12-30")),
+        timeFormat = "%d-%m-%Y"
+      )
+    ),
+    selectInput(
+      paste0("dataset", input_number),
+      "Choose player:",
+      choices = c("Player1", "Player2", "Proplayer"),
+      selected = "Player1"
+    ),
+    uiOutput(paste0("position_ui", input_number))
+  )
 }
+
 
 apply_spinner <- function(plot_name, spinner_type, colour = "#c89b3c", height = "400px"){
   shinycssloaders::withSpinner(plotlyOutput(plot_name, height = height),
@@ -166,7 +181,7 @@ ui <- navbarPage(
     ),
     tabPanel("Tab 3",
              fluidRow(
-               column(6, align = "center",
+               column(12, align = "center",
                       sliders_select_input(3)
                )
              ),
@@ -175,23 +190,27 @@ ui <- navbarPage(
                column(12, plotlyOutput("Heatmap", height = "600px"))
              )
     ),
-    tabPanel("Tab 4",
-             
-             fluidRow(
-               column(6, align = "center",
-                      sliders_select_input(4)
-               )
-             ),
-             fluidRow(
-               column(12, plotlyOutput("DensityDuration", height = "400px"))
-             ),
-             fluidRow(
-               column(12, plotlyOutput("DensityDamage", height = "400px"))
-             ),
-             fluidRow(
-               column(12, plotlyOutput("DensityGold", height = "400px"))
+  tabPanel("Tab 4",
+           fluidRow(
+             column(12, align = "center",
+                    checkboxGroupInput(
+                      inputId = "players",
+                      label = "Select Players:",
+                      choices = c("Player1", "Player2", "ProPlayer"),
+                      selected = c("Player1")
+                    )
              )
-    ),#"#c89b3c", bg_color = "#f0e6d2"
+           ),
+           fluidRow(
+             column(12, plotlyOutput("DensityDuration", height = "400px"))
+           ),
+           fluidRow(
+             column(12, plotlyOutput("DensityDamage", height = "400px"))
+           ),
+           fluidRow(
+             column(12, plotlyOutput("DensityGold", height = "400px"))
+           )
+  ),#"#c89b3c", bg_color = "#f0e6d2"
   footer = shiny::HTML("
                 <footer class='text-center text-sm-start' style='width:100%;'>
                 <hr>
@@ -213,8 +232,41 @@ ui <- navbarPage(
 )
 
 
-server <- function(input, output) {
+server <- function(input, output,session) {
+### Kod do wyświietlania ograniczonego dla ProPlayer
+  observe({
+    for (i in 1:2) {
+      dataset_input <- paste0("dataset", i)
+      position_input <- paste0("position", i)
+      if (!is.null(input[[dataset_input]])) {
+        choices <- if (input[[dataset_input]] == "Proplayer") {
+          c("All", "BOTTOM", "UTILITY")
+        } else {
+          c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY")
+        }
+        updateSelectInput(
+          session,
+          inputId = position_input,
+          choices = choices,
+          selected = "All"
+        )
+      }
+    }
+  })
+  observe({
+    lapply(1:2, function(i) { 
+      output[[paste0("position_ui", i)]] <- renderUI({
+        selectInput(
+          paste0("position", i),
+          "Choose position:",
+          choices = c("All", "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"),
+          selected = "All"
+        )
+      })
+    })
+  })
 
+####
   BarPlotGamesData <- reactive({
     nazwa_csv <- paste0(input$dataset2,".csv")
     data <- read.csv(nazwa_csv)
@@ -242,25 +294,54 @@ server <- function(input, output) {
     change_plotly_labels(plot)
   }) 
   
-
   BarPlotChampionData <- reactive({
-    nazwa_csv <- paste0(input$dataset2,".csv")
+    nazwa_csv <- paste0(input$dataset2, ".csv")
     data <- read.csv(nazwa_csv)
-    data <- data %>% filter_data(input$date_range2,input$position2) %>%
-      count(Champion) %>% 
-      filter(n > 2)
+    data <- data %>% 
+      filter_data(input$date_range2, input$position2) %>%
+      count(Champion, Position) %>% 
+      filter(n > 3)
     return(data)
   })
   
   output$BarPlotChampion <- renderPlotly({
-    data <- BarPlotChampionData() |> select(Champion, n) |> arrange(n)
-    plot2 <- ggplot(data, aes(x = fct_inorder(Champion), y = n)) +
-      geom_col(fill = choose_colour(input$dataset2)) 
-      plot2<- add_custom_theme(plot2,"Champions","Number of games","Games on champion", angle = 0) +
-        coord_flip()
+    data <- BarPlotChampionData() %>% 
+      select(Champion, Position, n) %>% 
+      arrange(n)
+    
+    position_colors <- c(
+      "BOTTOM" = "#1f77b4", 
+      "TOP" = "#ff7f0e", 
+      "JUNGLE" = "#2ca02c", 
+      "UTILITY" = "#d62728", 
+      "MIDDLE" = "#9467bd", 
+      "MIXED" = "#8c564b"
+    )
+    
+    data <- data %>% 
+      mutate(Position = ifelse(is.na(Position) | Position == "", "MIXED", Position)) %>%
+      mutate(Color = ifelse(Position %in% names(position_colors), 
+                            position_colors[Position], 
+                            position_colors["MIXED"]))
+    
+    plot2 <- ggplot(data, aes(x = fct_inorder(Champion), y = n, fill = Position)) +
+      geom_col() +
+      scale_fill_manual(values = position_colors, name = "Position") +
+      coord_flip()
+    
+    plot2 <- add_custom_theme(
+      plot2, 
+      "Champions", 
+      "Number of games", 
+      "Games on champion", 
+      angle = 0
+    ) +theme(legend.text = element_text(color = "#c89b3c"),legend.title = element_text(color = "#c89b3c")) 
+    
     plot <- ggplotly(plot2)
     change_plotly_labels(plot)
   })
+  
+  
   
   BarPlotWinRateData <- reactive({
     nazwa_csv <- paste0(input$dataset1, ".csv")
@@ -438,49 +519,86 @@ server <- function(input, output) {
     #   scale_y_discrete(labels = c("Mon", "Tues", "Wen", "Thurs", "Fri", "Sat", "Sun"))
     # add_custom_theme(heatmap, "Week", "Day of week", "Number of games heatmap")
   })
-  
   DensityPlotsData <- reactive({
-    nazwa_csv <- paste0(input$dataset4, ".csv")
-    data <- read.csv(nazwa_csv)
-    data <- data %>%
-      mutate(
-        Date = format(as.POSIXct(Date), "%Y-%m-%d"),
-        Day = format(as.POSIXct(Date), "%m-%d"),
-        win = ifelse(Win == "True", 1, 0)
-      ) %>% filter_data(input$date_range1,input$position1)%>%
-      mutate(gameLength=gameLength/60, goldPerMinute = ceiling(goldPerMinute))
+    selected_players <- input$players
+    if (length(selected_players) == 0) {
+      return(data.frame())
+    }
     
-    return(data)
+    player_data <- lapply(selected_players, function(player) {
+      file_name <- paste0(player, ".csv") 
+      data  <- read.csv(file_name)
+     data <- data%>%  mutate(riotIdTagline = as.character(riotIdTagline))%>%
+        mutate(
+          Player = player,
+          Date = format(as.POSIXct(Date), "%Y-%m-%d"),
+          Day = format(as.POSIXct(Date), "%m-%d"),
+          win = ifelse(Win == "True", 1, 0),
+          gameLength = gameLength / 60,
+          goldPerMinute = ceiling(goldPerMinute)
+        )
+      return(data)
+    })
+    
+    combined_data <- bind_rows(player_data)
+    filtered_data <- combined_data %>%
+      filter_data(input$date_range1, input$position1)
+    
+    return(filtered_data)
   })
-  
   output$DensityDuration <- renderPlotly({
     data <- DensityPlotsData()
-    plot9 <- ggplot(data, aes(x = gameLength)) +
-      geom_density(fill = choose_colour(input$dataset4))
-    plot9<- add_custom_theme(plot9,"Game duration","Density","Game Duration", angle = 0)
+    
+    if (nrow(data) == 0) {
+      return(NULL)
+    }
+    
+    plot9 <- ggplot(data, aes(x = gameLength, color = Player, fill = Player)) +
+      geom_density(alpha = 0.4) +  
+      scale_fill_manual(values = choose_colour2(input$players)) +
+      scale_color_manual(values = choose_colour2(input$players))+
+      labs(x = "Game Duration", y = "Density", title = "Game Duration Density") +
+      theme_minimal()
     plot <- ggplotly(plot9)
     change_plotly_labels(plot)
   })
   
-  output$DensityGold<- renderPlotly({
+  output$DensityGold <- renderPlotly({
     data <- DensityPlotsData()
     
-    plot7 <- ggplot(data, aes(x = goldPerMinute)) +
-      geom_density(fill = choose_colour(input$dataset4))
-    plot7<- add_custom_theme(plot7,"Gold per minute","Density","Gold per minute", angle = 0)
+    if (nrow(data) == 0) {
+      return(NULL)
+    }
+    
+    plot7 <- ggplot(data, aes(x = goldPerMinute, color = Player, fill = Player)) +
+      geom_density(alpha = 0.4) + 
+      scale_fill_manual(values = choose_colour2(input$players)) +
+      scale_color_manual(values = choose_colour2(input$players)) +
+      labs(x = "Gold Per Minute", y = "Density", title = "Gold Per Minute Density") +
+      theme_minimal()
+   
     plot <- ggplotly(plot7)
     change_plotly_labels(plot)
   })
   
   output$DensityDamage <- renderPlotly({
     data <- DensityPlotsData()
-    plot8 <- ggplot(data, aes(x = damagePerMinute)) +
-      geom_density(fill = choose_colour(input$dataset4))
-    plot8<- add_custom_theme(plot8,"Damage per minute","Density","Damage per minute", angle = 0)
+    
+    if (nrow(data) == 0) {
+      return(NULL)
+    }
+    
+    plot8 <- ggplot(data, aes(x = damagePerMinute, color = Player, fill = Player)) +
+      geom_density(alpha = 0.4) + 
+      scale_fill_manual(values = choose_colour2(input$players)) +
+      scale_color_manual(values = choose_colour2(input$players)) +
+      labs(x = "Damage Per Minute", y = "Density", title = "Damage Per Minute Density") +
+      theme_minimal()
+    
     plot <- ggplotly(plot8)
     change_plotly_labels(plot)
+    
   })
-  
 }
 
 shinyApp(ui = ui, server = server)
