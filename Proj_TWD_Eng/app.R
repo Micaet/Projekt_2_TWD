@@ -82,7 +82,7 @@ change_plotly_labels <- function(plot, main_color = "#c89b3c", bg_color = "#f0e6
 }
 
 sliders_select_input <- function(input_number) {
-  list(
+  fluidRow(
     tags$div(
       class = "slider-custom",
       sliderInput(
@@ -115,23 +115,38 @@ apply_spinner <- function(plot_name, spinner_type = 1, colour = "#f0e6d2", heigh
                                )
 }
 
+
 place_holder <- column(12, tags$div(class = 'placeholder'))
+
+add_text_decorator <- function(text_before = NULL, text_after = NULL, decorator){
+  if(decorator == 'large') {
+    col <- column(12, align = 'center', 
+                  tags$div(class = 'text-img', text_before , tags$img(class = "dec-l", src = "dec_l.png"), text_after))
+  } else if (decorator == 'small'){
+    col <- column(12, align = 'center', 
+                  tags$div(class = 'text-img', text_before , tags$img(class = "dec-s", src = "dec_s.png"), text_after))
+  }
+  x <- list(
+  place_holder, col, place_holder)
+}
+
+
 
 
 ui <- navbarPage(
   title = tags$div(class = "app-title", span(img(src = "favicon.png")), 'eague of Stats'), #titlePanel("League of Stats"),
-
-    #header =  tags$head(
-      
+    #header =  tags$head(  
     #),
   
   #tabsetPanel(
-    tabPanel("Tab 1",
+    tabPanel("Win rate",
+             tags$link(rel = "icon", href = "favicon.png"),
              tags$div(class = "slider-custom"),
              tags$div(class = "custom-checkbox"),
-             tags$link(rel = "icon", href = "favicon.png"),
-             tags$link(rel = "stylesheet", href = "fonts.css"),
-             tags$link(rel = "stylesheet", href = "styles.css"),
+             tags$link(type="text/css", rel = "stylesheet", href = "fonts.css"),
+             tags$link(type="text/css", rel = "stylesheet", href = "styles.css"),
+             
+             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'large'),
 
              fluidRow(
                column(3, align = "center",
@@ -142,12 +157,9 @@ ui <- navbarPage(
                       apply_spinner("ScatterPlotPings") # '#73ea13')
                )
              ),
-             fluidRow(
-               place_holder,
-               column(12, align = "center",
-                      tags$img(class = "dec-l", src = "dec_l.png")),
-               place_holder
-             ),
+             
+             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'small'),
+              
              fluidRow(
                column(9,
                       apply_spinner("BarPlotWinRate") # 'blue')
@@ -159,7 +171,9 @@ ui <- navbarPage(
              )
     ),
     
-    tabPanel("Tab 2",
+    tabPanel("Number of games",
+             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'large'),
+             
              fluidRow(
                column(3, align = "center",
                       sliders_select_input(2)
@@ -167,52 +181,87 @@ ui <- navbarPage(
                column(9, apply_spinner("BarPlotChampion")),
              ),
 
-             fluidRow(
-               column(12)
-             ),
+             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'small'),
 
              fluidRow(
                column(12, apply_spinner("BarPlotGames"))
              )
     ),
-    tabPanel("Tab 3",
+    tabPanel("Detailed stats",
+             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'large'),
+             
              fluidRow(
-               column(12, align = "center",
-                      sliders_select_input(3)
+               column(6, align = "center",
+                      tags$div(
+                        class = "custom-checkbox",
+                        checkboxGroupInput(
+                          inputId = "players",
+                          label = "Select Players:",
+                          choices = c("Player1", "Player2", "ProPlayer"),
+                          selected = c("Player1")
+                        )
+                      )
+               ),
+               column(6, align = "center",
+                      selectInput(
+                        inputId = "plotChoice",
+                        label = "Choose density plot:",
+                        choices = c("Game Duration", "Damage per minute", "Gold per minute"),
+                        selected = "DensityDuration"
+                      )
                )
              ),
              
              fluidRow(
-               column(12, apply_spinner("Heatmap", height = "600px"))
+              column(12,
+                    uiOutput("dynamicPlot") # Dynamic UI for the selected plot
+             )
+           ),
+           
+             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'small'),
+             
+             fluidRow(
+              column(10, apply_spinner("Heatmap", height = "600px")
+                    ),
+              column(2, align = "center",
+                    selectInput(
+                      "dataset3",
+                      "Choose player:",
+                      choices = c("Player1", "Player2", "Proplayer"),
+                      selected = "Player1"
+                    )
+                  )
              )
     ),
-  tabPanel("Tab 4",
-                   fluidRow(
-                     column(6, align = "center",
-                            tags$div(
-                              class = "custom-checkbox",
-                              checkboxGroupInput(
-                                inputId = "players",
-                                label = "Select Players:",
-                                choices = c("Player1", "Player2", "ProPlayer"),
-                                selected = c("Player1")
-                              )
-                            )
-                     ),
-                     column(6, align = "center",
-                            selectInput(
-                              inputId = "plotChoice",
-                              label = "Select Density Plot:",
-                              choices = c("Game Duration", "Damage per minute", "Gold per minute"),
-                              selected = "DensityDuration"
-                            )
-                     )
-                   ),
-                   fluidRow(
-                     column(12,
-                            uiOutput("dynamicPlot") # Dynamic UI for the selected plot
-                     )
-                   )
+  tabPanel("To be done",
+           add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'large'),
+           
+           # fluidRow(
+           #   column(6, align = "center",
+           #          tags$div(
+           #            class = "custom-checkbox",
+           #            checkboxGroupInput(
+           #              inputId = "players",
+           #              label = "Select Players:",
+           #              choices = c("Player1", "Player2", "ProPlayer"),
+           #              selected = c("Player1")
+           #            )
+           #          )
+           #     ),
+           #   column(6, align = "center",
+           #          selectInput(
+           #            inputId = "plotChoice",
+           #            label = "Choose density plot:",
+           #            choices = c("Game Duration", "Damage per minute", "Gold per minute"),
+           #            selected = "DensityDuration"
+           #          )
+           #   )
+           #         ),
+           # fluidRow(
+           #   column(12,
+           #          uiOutput("dynamicPlot") # Dynamic UI for the selected plot
+           #   )
+           # )
   )
   ,#"#c89b3c", bg_color = "#f0e6d2"
   footer = shiny::HTML("
@@ -221,10 +270,16 @@ ui <- navbarPage(
                 <p class='text-center' style='font-size:26px; color:#f7bb45; font-family:Beaufort;'>
                   About project
                 </p>
-                <p class='text-center' style='font-size:20px; color:#c89b3c; font-family:Beaufort;'>
+                <p class='text-center' style='font-size:22px; color:#c89b3c; font-family:Beaufort;'>
                   Authors: MB, RC, MS
                 </p>
-                <p class='text-center' style='font-size:16px; color:#f0e6d2; font-family:Beaufort;'>
+                <p class='text-left' style='font-size:20px; color:#f0e6d2; font-family:Beaufort; margin:10px;'>
+                  Some description Some description Some description Some description Some description
+                  Some description Some description Some description Some description Some description 
+                  Some description Some description Some description Some description Some description
+                  Some description Some description Some description Some description Some description
+                </p>
+                <p class='text-center' style='font-size:16px; color:#c89b3c; font-family:Beaufort;'>
                   Source of data:
                   <a class='text-dark' href='https://developer.riotgames.com/'>RiotGames API</a>
                 </p>
@@ -281,7 +336,8 @@ server <- function(input, output,session) {
     } else if (selected_plot == "Gold per minute") {
       apply_spinner("DensityGold")
     }
-  })
+  }) |>
+    bindCache(input$plotChoice)
   ###
   BarPlotGamesData <- reactive({
     nazwa_csv <- paste0(input$dataset2,".csv")
@@ -301,7 +357,7 @@ server <- function(input, output,session) {
   output$BarPlotGames <- renderPlotly({
     data <- BarPlotGamesData()
     total_games <- sum(data$n)
-    plot <- ggplot(data, aes(x = Date, y = n)) +
+    plot <- ggplot(data |> rename(`Number of games` = n), aes(x = Date, y = `Number of games`)) +
       geom_col(fill = choose_colour(input$dataset2)) 
     plot<- add_custom_theme(plot,"Date","Number of games",
                            paste("Games per day       ", "             Total number of games:", total_games))
@@ -393,9 +449,9 @@ server <- function(input, output,session) {
   output$BarPlotWinRate <- renderPlotly({
     data <- BarPlotWinRateData()
     plot3 <- ggplot(data, aes(x = Day, y = win_ratio,
-    text = paste("Date:", as.character(Day), "<br>Win ratio:", round(win_ratio*100,2),"%")))+
+    text = paste("Date:", as.character(Day), "<br>Win rate:", round(win_ratio*100,2),"%")))+
     geom_col(fill = choose_colour(input$dataset1))
-    plot3<- add_custom_theme(plot3,"Day","Winrate","Winrate in each day")
+    plot3<- add_custom_theme(plot3,"Day","Win rate","Win rate in each day")
     plot <- ggplotly(plot3,tooltip = 
                        "text")
     change_plotly_labels(plot)
@@ -433,7 +489,7 @@ server <- function(input, output,session) {
                          marker = list(colors = c("#3cb371", "#ff6347"))) %>%
       layout(
         title = list(
-          text = paste("Winrate: ", round(winrate * 100, 2), "%"),
+          text = paste("Win rate: ", round(winrate * 100, 2), "%"),
           font = list(size = 16)  
         ))
     
@@ -472,9 +528,9 @@ server <- function(input, output,session) {
     data <- ScatterPlotPingsData()
     
     plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio,
-                              text=paste("Number of pings:", Pings_group, "<br>Win ratio:", round(win_ratio*100,2),"%"))) +
+                              text=paste("Number of pings:", Pings_group, "<br>Win rate:", round(win_ratio*100,2),"%"))) +
     geom_point(color = choose_colour(input$dataset1)) 
-    plot5<- add_custom_theme(plot5,"Number of pings","Winrate","Winrate by number of pings")
+    plot5<- add_custom_theme(plot5,"Number of pings","Win rate","Win rate by number of pings")
     
     plot <- ggplotly(plot5,tooltip = "text")
     change_plotly_labels(plot)
@@ -586,8 +642,9 @@ server <- function(input, output,session) {
     
     plot9 <- ggplot(data, aes(x = gameLength, color = Player, fill = Player)) +
       geom_density(alpha = 0.4) +  
-      scale_fill_manual(values = choose_colour2(input$players)) 
+      scale_fill_manual(values = choose_colour2(input$players)) +
     #scale_color_manual(values = choose_colour2(input$players))+
+      coord_cartesian(xlim = c(0, 50), ylim = c(0, 0.07))
     plot9 <- add_custom_theme(plot9, x = "Game Duration", y = "Density", "Game Duration Density",
                               angle = 0, if_legend = T)
     plot <- ggplotly(plot9, tooltip = c("x", "color"))
@@ -603,7 +660,8 @@ server <- function(input, output,session) {
     
     plot7 <- ggplot(data, aes(x = goldPerMinute, color = Player, fill = Player)) +
       geom_density(alpha = 0.4) + 
-      scale_fill_manual(values = choose_colour2(input$players))
+      scale_fill_manual(values = choose_colour2(input$players)) +
+      coord_cartesian(xlim = c(0, 1000), ylim = c(0, 0.008))
       #scale_color_manual(values = choose_colour2(input$players)) +
     plot7 <- add_custom_theme(plot7, x = "Gold Per Minute", y = "Density", "Gold Per Minute Density", 
                               angle = 0, if_legend = T)
@@ -621,7 +679,8 @@ server <- function(input, output,session) {
     
     plot8 <- ggplot(data, aes(x = damagePerMinute, color = Player, fill = Player)) +
       geom_density(alpha = 0.4) + 
-      scale_fill_manual(values = choose_colour2(input$players))
+      scale_fill_manual(values = choose_colour2(input$players)) +
+      coord_cartesian(xlim = c(0, 3000), ylim = c(0, 0.0025))
       #scale_color_manual(values = choose_colour2(input$players)) +
     plot8 <- add_custom_theme(plot8, x = "Damage Per Minute", y = "Density", "Damage Per Minute Density", 
                               angle = 0, if_legend = T)
