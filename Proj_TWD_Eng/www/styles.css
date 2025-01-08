@@ -3,7 +3,7 @@
   --gold_b: #f7bb45;
   --wh: #f0e6d2;
   --bg: #181d24;
-  --bg_d: #020a12;
+  --bg_d: #010a12;
 }
 
 * {
@@ -13,17 +13,27 @@
 }
 
 body {
-  background-color: #181d24;
+  background-color: var(--bg_d);
   font-family: "Spiegel";
   font-size: 16pt;
   line-height: 20pt;
-  color: #c89b3c;
+  color: var(--g);
   text-rendering: optimizelegibility;
   cursor: url("cursor.png"), auto;
 }
 
+.text-img {
+  align: center;
+  background-color: var(--bg) !important;
+  color: var(--wh) !important;
+  font-family: "Beaufort";
+  font-size: 18pt;
+  line-height: 21pt;
+  padding: 10px;
+}
+
 .placeholder{
-  height: 50px;
+  height: 30px;
 }
 
 a,
@@ -47,7 +57,6 @@ label {
 .container-fluid {
   display: inherit;
   width: 100%;
-  background-color: var(--bg);
 }
 
 .checkbox {
@@ -62,7 +71,7 @@ cursor: url("cursor-pointer.png"), auto;
 .custom-checkbox input[type="checkbox"]:before {
   border: 2px solid;
   color: var(--wh);
-  background-color: var(--bg);
+  background-color: var(--bg_d);
   content: "";
   height: 15px;
   left: 0;
@@ -74,7 +83,7 @@ cursor: url('cursor-pointer.png'), auto;
 
 .custom-checkbox input[type="checkbox"]:checked:after {
   color: var(-g);
-  background-color: var(--bg);
+  background-color: var(--bg_d);
     content: "✓";
   font-size: medium;
   vertical-align: middle;
@@ -116,7 +125,7 @@ background: var(--bg);
 .selectize-control.single .selectize-input input-active {
   cursor: url("cursor-pointer.png"), auto;
 background-image: var(--bg_d);
-background: var(--bg_d);
+background: var(--bg);
 border-color: var(--g) var(--g) var(--g) var(--g); 
 }
 
@@ -185,7 +194,6 @@ border-radius: 0px;
   font-size: 20pt;
   line-height: 22pt;
   color: #c89b3c;
-background: var(--bg)
 }
 
 rect {
@@ -236,7 +244,7 @@ vertical-align: middle;
 
 .navbar {
   display: flex;
-  background-color: var(--bg);
+  background-color: var(--bg_d);
   height: 80px;
 }
 
@@ -258,7 +266,7 @@ vertical-align: middle;
   color: var(--gold_b);
   font-family: "Beaufort";
   width: fit-content;
-  font-size: 16px;
+  font-size: 16pt;
   border-top: 2px solid var(--g);
   border-left: 2px solid var(--g);
 }
@@ -274,7 +282,7 @@ vertical-align: middle;
 .navbar-default .navbar-nav > .active > a:focus,
 .navbar-default .navbar-nav > .active > a:hover {
   color: var(--g);
-  background-image: linear-gradient(to right, var(--g), var(--bg));
+  background-image: linear-gradient(to right, var(--g), var(--bg_d));
   border-left: 2px solid var(--g);
   border-top: 2px solid var(--g);
   transition: 0.3s;
@@ -301,11 +309,18 @@ vertical-align: middle;
   align-items: center !important;
   justify-content: center !important;
   gap: 6px;
+  padding: 10px;
 }
 
 .dec-s{
   display: flex;
   width: 80%;
+  height: 80%;
+  flex-direction: column;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px;
+  padding: 10px;
 }
 
 
