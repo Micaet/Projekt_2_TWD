@@ -187,29 +187,34 @@ ui <- navbarPage(
              )
     ),
   tabPanel("Tab 4",
-           fluidRow(
-             column(12, align = "center",
-                    tags$div(
-                      class = "custom-checkbox",
-                      checkboxGroupInput(
-                        inputId = "players",
-                        label = "Select Players:",
-                        choices = c("Player1", "Player2", "ProPlayer"),
-                        selected = c("Player1")
-                      )
-                    )
-             )
-           ),
-           fluidRow(
-             column(12, apply_spinner("DensityDuration"))
-           ),
-           fluidRow(
-             column(12, apply_spinner("DensityDamage"))
-           ),
-           fluidRow(
-             column(12, apply_spinner("DensityGold"))
-           )
-  ),#"#c89b3c", bg_color = "#f0e6d2"
+                   fluidRow(
+                     column(6, align = "center",
+                            tags$div(
+                              class = "custom-checkbox",
+                              checkboxGroupInput(
+                                inputId = "players",
+                                label = "Select Players:",
+                                choices = c("Player1", "Player2", "ProPlayer"),
+                                selected = c("Player1")
+                              )
+                            )
+                     ),
+                     column(6, align = "center",
+                            selectInput(
+                              inputId = "plotChoice",
+                              label = "Select Density Plot:",
+                              choices = c("Game Duration", "Damage per minute", "Gold per minute"),
+                              selected = "DensityDuration"
+                            )
+                     )
+                   ),
+                   fluidRow(
+                     column(12,
+                            uiOutput("dynamicPlot") # Dynamic UI for the selected plot
+                     )
+                   )
+  )
+  ,#"#c89b3c", bg_color = "#f0e6d2"
   footer = shiny::HTML("
                 <footer class='text-center text-sm-start' style='width:100%;'>
                 <hr>
@@ -265,7 +270,19 @@ server <- function(input, output,session) {
     })
   })
 
-####
+#### Wyświetlanie 1 z trzech
+  output$dynamicPlot <- renderUI({
+    selected_plot <- input$plotChoice
+    
+    if (selected_plot == "Game Duration") {
+      apply_spinner("DensityDuration")
+    } else if (selected_plot == "Damage per minute") {
+      apply_spinner("DensityDamage")
+    } else if (selected_plot == "Gold per minute") {
+      apply_spinner("DensityGold")
+    }
+  })
+  ###
   BarPlotGamesData <- reactive({
     nazwa_csv <- paste0(input$dataset2,".csv")
     data <- read.csv(nazwa_csv)
@@ -286,7 +303,7 @@ server <- function(input, output,session) {
     total_games <- sum(data$n)
     plot <- ggplot(data, aes(x = Date, y = n)) +
       geom_col(fill = choose_colour(input$dataset2)) 
-   plot<- add_custom_theme(plot,"Date","Number of games",
+    plot<- add_custom_theme(plot,"Date","Number of games",
                            paste("Games per day       ", "             Total number of games:", total_games))
     
     plot <- ggplotly(plot)
@@ -306,7 +323,7 @@ server <- function(input, output,session) {
     data <- data %>% 
       filter_data(input$date_range2, input$position2) %>%
       count(Champion, Position) %>% 
-      filter(n > 3)
+      filter(n >2)
     return(data)
   })
   
@@ -329,8 +346,10 @@ server <- function(input, output,session) {
       mutate(Color = ifelse(Position %in% names(position_colors), 
                             position_colors[Position], 
                             position_colors["MIXED"]))
-    
-    plot2 <- ggplot(data, aes(x = fct_inorder(Champion), y = n, fill = Position)) +
+    plot2 <- ggplot(data, aes(x = fct_inorder(Champion), y = n, fill = Position, 
+                              text = paste("Champion:", Champion, 
+                                           "<br>Number of games:", n, 
+                                           "<br>Position:", Position))) +
       geom_col() +
       scale_fill_manual(values = position_colors, name = "Position") +
       coord_flip()
@@ -343,7 +362,8 @@ server <- function(input, output,session) {
       angle = 0
     ) +theme(legend.text = element_text(color = "#c89b3c"),legend.title = element_text(color = "#c89b3c")) 
     
-    plot <- ggplotly(plot2)
+    plot <- ggplotly(plot2, tooltip = "text")
+    
     change_plotly_labels(plot)
   }) |>
     bindCache(input$dataset2, input$date_range2, input$position2)
@@ -372,10 +392,12 @@ server <- function(input, output,session) {
   
   output$BarPlotWinRate <- renderPlotly({
     data <- BarPlotWinRateData()
-    plot3 <- ggplot(data, aes(x = Day, y = win_ratio)) +
-      geom_col(fill = choose_colour(input$dataset1))
+    plot3 <- ggplot(data, aes(x = Day, y = win_ratio,
+    text = paste("Date:", as.character(Day), "<br>Win ratio:", round(win_ratio*100,2),"%")))+
+    geom_col(fill = choose_colour(input$dataset1))
     plot3<- add_custom_theme(plot3,"Day","Winrate","Winrate in each day")
-    plot <- ggplotly(plot3)
+    plot <- ggplotly(plot3,tooltip = 
+                       "text")
     change_plotly_labels(plot)
     
   }) |>
@@ -449,11 +471,12 @@ server <- function(input, output,session) {
   output$ScatterPlotPings <- renderPlotly({
     data <- ScatterPlotPingsData()
     
-    plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio)) +
+    plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio,
+                              text=paste("Number of pings:", Pings_group, "<br>Win ratio:", round(win_ratio*100,2),"%"))) +
     geom_point(color = choose_colour(input$dataset1)) 
     plot5<- add_custom_theme(plot5,"Number of pings","Winrate","Winrate by number of pings")
     
-    plot <- ggplotly(plot5)
+    plot <- ggplotly(plot5,tooltip = "text")
     change_plotly_labels(plot)
   }) |>
     bindCache(input$dataset1, input$date_range1, input$position1)
@@ -551,25 +574,23 @@ server <- function(input, output,session) {
     })
     
     combined_data <- bind_rows(player_data)
-    filtered_data <- combined_data %>%
-      filter_data(input$date_range1, input$position1)
     
-    return(filtered_data)
+    return(combined_data)
   })
   output$DensityDuration <- renderPlotly({
     data <- DensityPlotsData()
-    
     if (nrow(data) == 0) {
       return(NULL)
     }
+  
     
     plot9 <- ggplot(data, aes(x = gameLength, color = Player, fill = Player)) +
       geom_density(alpha = 0.4) +  
       scale_fill_manual(values = choose_colour2(input$players)) 
-      #scale_color_manual(values = choose_colour2(input$players))+
+    #scale_color_manual(values = choose_colour2(input$players))+
     plot9 <- add_custom_theme(plot9, x = "Game Duration", y = "Density", "Game Duration Density",
                               angle = 0, if_legend = T)
-    plot <- ggplotly(plot9)
+    plot <- ggplotly(plot9, tooltip = c("x", "color"))
     change_plotly_labels(plot)
   }) 
   
@@ -587,7 +608,7 @@ server <- function(input, output,session) {
     plot7 <- add_custom_theme(plot7, x = "Gold Per Minute", y = "Density", "Gold Per Minute Density", 
                               angle = 0, if_legend = T)
    
-    plot <- ggplotly(plot7)
+    plot <- ggplotly(plot7,tooltip = c("x", "color"))
     change_plotly_labels(plot)
   })
   
@@ -605,7 +626,7 @@ server <- function(input, output,session) {
     plot8 <- add_custom_theme(plot8, x = "Damage Per Minute", y = "Density", "Damage Per Minute Density", 
                               angle = 0, if_legend = T)
     
-    plot <- ggplotly(plot8)
+    plot <- ggplotly(plot8,tooltip = c("x", "color"))
     change_plotly_labels(plot)
     
   })
