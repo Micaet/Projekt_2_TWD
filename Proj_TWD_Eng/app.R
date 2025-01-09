@@ -473,12 +473,12 @@ server <- function(input, output,session) {
       reframe(
         total_matches = n(),
         wins = sum(win, na.rm = TRUE),
-        winrate = wins / total_matches
+        winrate = wins / total_matches 
       ) 
     return(data)
   })
   
-  output$PieChartWinRate <- renderPlotly({
+  output$PieChartWinRate <- renderPlotly({ #skala na y % 
     data <- PieChartWinRateData()
     winrate <- data$winrate + 0.1 
     lose_rate <- 1 - winrate
@@ -489,7 +489,7 @@ server <- function(input, output,session) {
     )
     pie_chart <- plot_ly(pie_data, labels = ~status, values = ~proportion, type = 'pie',
                          textinfo = 'label+percent', hoverinfo = 'label+percent', 
-                         marker = list(colors = c("#3cb371", "#ff6347"))) %>%
+                         marker = list(colors = c("#3cb371", "#ff6347"))) %>% #jasny szary, złoty
       layout(
         title = list(
           text = paste("Win rate: ", round(winrate * 100, 2), "%"),
@@ -696,3 +696,4 @@ server <- function(input, output,session) {
 }
 
 shinyApp(ui = ui, server = server)
+
