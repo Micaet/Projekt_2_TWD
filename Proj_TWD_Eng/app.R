@@ -358,7 +358,8 @@ server <- function(input, output,session) {
     data <- BarPlotGamesData()
     total_games <- sum(data$n)
     plot <- ggplot(data |> rename(`Number of games` = n), aes(x = Date, y = `Number of games`)) +
-      geom_col(fill = choose_colour(input$dataset2)) 
+      geom_col(fill = choose_colour(input$dataset2)) +
+      coord_cartesian(ylim = c(0, 16))
     plot<- add_custom_theme(plot,"Date","Number of games",
                            paste("Games per day       ", "             Total number of games:", total_games))
     
@@ -379,7 +380,8 @@ server <- function(input, output,session) {
     data <- data %>% 
       filter_data(input$date_range2, input$position2) %>%
       count(Champion, Position) %>% 
-      filter(n >2)
+      filter(n >2)%>%
+      filter(!(Champion == "Vladimir") )
     return(data)
   })
   
@@ -408,7 +410,7 @@ server <- function(input, output,session) {
                                            "<br>Position:", Position))) +
       geom_col() +
       scale_fill_manual(values = position_colors, name = "Position") +
-      coord_flip()
+      coord_flip(ylim = c(0, 43))
     
     plot2 <- add_custom_theme(
       plot2, 
@@ -450,7 +452,8 @@ server <- function(input, output,session) {
     data <- BarPlotWinRateData()
     plot3 <- ggplot(data, aes(x = Day, y = win_ratio,
     text = paste("Date:", as.character(Day), "<br>Win rate:", round(win_ratio*100,2),"%")))+
-    geom_col(fill = choose_colour(input$dataset1))
+    geom_col(fill = choose_colour(input$dataset1)) +
+      coord_cartesian(ylim = c(0, 1))
     plot3<- add_custom_theme(plot3,"Day","Win rate","Win rate in each day")
     plot <- ggplotly(plot3,tooltip = 
                        "text")
@@ -529,7 +532,8 @@ server <- function(input, output,session) {
     
     plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio,
                               text=paste("Number of pings:", Pings_group, "<br>Win rate:", round(win_ratio*100,2),"%"))) +
-    geom_point(color = choose_colour(input$dataset1)) 
+    geom_point(color = choose_colour(input$dataset1)) +
+      coord_cartesian(ylim = c(0, 1))
     plot5<- add_custom_theme(plot5,"Number of pings","Win rate","Win rate by number of pings")
     
     plot <- ggplotly(plot5,tooltip = "text")
