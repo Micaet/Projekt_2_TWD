@@ -48,61 +48,101 @@ for match_id in match_ids:
         print(f"Failed to fetch timeline for {match_id}")
         continue
     timeline = timeline_response.json()
-    for frame in timeline['info']['frames']:
-        for event in frame['events']:
-            # Przypadek: Gracz jako zabójca
-            if event.get('killerId') == player_idx + 1:
-                position = event.get('position', {})
-                x = position.get('x', None)
-                y = position.get('y', None)
-                if x is not None and y is not None:  # Sprawdzenie, czy x i y istnieją
-                    record = {
-                        "player_id": PUUID,
-                        "match_id": match_id,
-                        "x": x,
-                        "y": y,
-                        "type": "kill",
-                        "minute": frame['timestamp'] // 60000,
-                        "champion_id": champion_id,
-                        "champion_name": champion_name,
-                    }
-                    data_records.append(record)
+    import requests
+    import pandas as pd
 
-            # Przypadek: Gracz jako asystent
-            if event.get('assistingParticipantIds') and (player_idx + 1) in event['assistingParticipantIds']:
-                position = event.get('position', {})
-                x = position.get('x', None)
-                y = position.get('y', None)
-                if x is not None and y is not None:  # Sprawdzenie, czy x i y istnieją
-                    record = {
-                        "player_id": PUUID,
-                        "match_id": match_id,
-                        "x": x,
-                        "y": y,
-                        "type": "assist",
-                        "minute": frame['timestamp'] // 60000,
-                        "champion_id": champion_id,
-                        "champion_name": champion_name,
-                    }
-                    data_records.append(record)
+    # Twój klucz API
+    api_key = "RGAPI-cf78151b-c0f8-4631-ad98-9edc87ba8cdb"
+    puuid = "gvoAqYp_sGkRdYvAy4SZD98TIy4KHMvrlH3GcYKcL4RZvrtT6UWK9WD4qJmRUL2p7u29gdGpifKVXw"
 
-            # Przypadek: Gracz jako ofiara
-            if event.get('victimId') == player_idx + 1:
-                position = event.get('position', {})
-                x = position.get('x', None)
-                y = position.get('y', None)
-                if x is not None and y is not None:  # Sprawdzenie, czy x i y istnieją
-                    record = {
-                        "player_id": PUUID,
-                        "match_id": match_id,
-                        "x": x,
-                        "y": y,
-                        "type": "death",
-                        "minute": frame['timestamp'] // 60000,
-                        "champion_id": champion_id,
-                        "champion_name": champion_name,
-                    }
-                    data_records.append(record)
+    # URL do pobrania ID meczów
+    match_list_api_url = f"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start=60&count=10&api_key={api_key}"
+
+    # Pobranie listy meczów
+    response = requests.get(match_list_api_url)
+    match_ids = response.json()
+
+    # Tylko 3 pierwsze mecze z listy
+    selected_matches = match_ids[:3]
+
+    # Lista na dane wyjściowe
+    data_records = []
+
+    # Przetwarzanie wybranych meczów
+    for match_id in selected_matches:
+        # URL do pobrania danych o meczu
+        match_url = f"https://europe.api.riotgames.com/lol/match/v5/matches/{match_id}?api_key={api_key}"
+        timeline_url = f"https://europe.api.riotgames.com/lol/match/v5/matches/{match_id}/timeline?api_key={api_key}"
+
+        match_response = requests.get(match_url)
+        timeline_response = requests.get(timeline_url)
+
+        if match_response.status_code == 200 and timeline_response.status_code == 200:
+            match_data = match_response.json()
+            timeline_data = timeline_response.json()
+
+            # Znajdź indeks gracza
+            player_idx = next((i for i, p in enumerate(match_data['metadata']['participants']) if p == puuid), None)
+
+            if player_idx is not None:
+                participant = match_data['info']['participants'][player_idx]
+
+                # Filtrujemy pozycję gracza - tylko "BOTTOM"
+                if participant['teamPosition'] == "BOTTOM":
+                    champion_name = participant['championName']
+                    champion_id = participant['championId']
+
+                    # Pobieranie wydarzeń z timeline
+                    for frame in timeline_data['info']['frames']:
+                        for event in frame['events']:
+                            position = event.get('position', {})
+                            x = position.get('x', None)
+                            y = position.get('y', None)
+
+                            if x is not None and y is not None:
+                                if event.get('killerId') == player_idx + 1:
+                                    data_records.append({
+                                        "player_id": puuid,
+                                        "match_id": match_id,
+                                        "x": x,
+                                        "y": y,
+                                        "type": "kill",
+                                        "minute": frame['timestamp'] // 60000,
+                                        "timestamp": event.get('timestamp'),
+                                        "champion_id": champion_id,
+                                        "champion_name": champion_name,
+                                    })
+                                elif event.get('victimId') == player_idx + 1:
+                                    data_records.append({
+                                        "player_id": puuid,
+                                        "match_id": match_id,
+                                        "x": x,
+                                        "y": y,
+                                        "type": "death",
+                                        "minute": frame['timestamp'] // 60000,
+                                        "timestamp": event.get('timestamp'),
+                                        "champion_id": champion_id,
+                                        "champion_name": champion_name,
+                                    })
+                                elif event.get('assistingParticipantIds') and (player_idx + 1) in event[
+                                    'assistingParticipantIds']:
+                                    data_records.append({
+                                        "player_id": puuid,
+                                        "match_id": match_id,
+                                        "x": x,
+                                        "y": y,
+                                        "type": "assist",
+                                        "minute": frame['timestamp'] // 60000,
+                                        "timestamp": event.get('timestamp'),
+                                        "champion_id": champion_id,
+                                        "champion_name": champion_name,
+                                    })
+
+    # Tworzenie DataFrame z wynikami
+    df = pd.DataFrame(data_records)
+
+    # Zapis do pliku CSV
+    df.to_csv("bottom_match_events.csv", index=False)
 
 # Zapis do pliku CSV
 df = pd.DataFrame(data_records)
