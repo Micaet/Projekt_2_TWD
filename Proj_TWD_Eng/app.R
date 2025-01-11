@@ -239,6 +239,9 @@ ui <- navbarPage(
   tabPanel("To be done",
            add_text_decorator("This chart shows the number and details of events that took place during the game. It represents the map 
                               in League of Legends, with dots marking the events that occurred, such as kills, assists, and deaths.", decorator = 'large'),
+           fluidRow(
+             column(12, apply_spinner("MapPlot", height = "512px")
+             ),
            
            # fluidRow(
            #   column(6, align = "center",
@@ -266,7 +269,7 @@ ui <- navbarPage(
            #          uiOutput("dynamicPlot") # Dynamic UI for the selected plot
            #   )
            # )
-  )
+  ))
   ,#"#c89b3c", bg_color = "#f0e6d2"
   footer = shiny::HTML("
                 <footer class='text-center text-sm-start' style='width:100%;'>
@@ -698,7 +701,62 @@ server <- function(input, output,session) {
     change_plotly_labels(plot)
     
   })
+  output$MapPlot <- renderPlotly({
+    data <- read.csv("Bottom_matches.csv")
+    
+    plot <- data %>% plot_ly(
+      x = ~x,
+      y = ~y,
+      type = "scatter",
+      mode = "markers",
+      color = ~type,
+      size = 3,
+      height = 420,
+      width = 500
+    ) %>% layout(
+      images = list(
+        source = base64enc::dataURI(file = "./www/map11.png"),
+        x = 0,
+        y = 0,
+        sizex = 1,
+        sizey = 1,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "left",
+        yanchor = "bottom",
+        layer = "below"
+      ),
+      paper_bgcolor = 'rgba(0,0,0,0)',
+      plot_bgcolor = 'rgba(0,0,0,0)',
+      xaxis = list(
+        title = '',
+        showgrid = FALSE,
+        showticklabels = FALSE,
+        range(0, 14000),
+        tickfont = list(color = 'rgba(0,0,0,0)'),
+        linecolor = 'rgba(0,0,0,0)'
+      ),
+      yaxis = list(
+        title = '',
+        showgrid = FALSE,
+        showticklabels = FALSE,
+        range(0, 14000),
+        tickfont = list(color = 'rgba(0,0,0,0)'),
+        linecolor = 'rgba(0,0,0,0)'
+      ),
+      legend = list(
+        font = list(
+          color ="#c8aa6e"
+        )
+      )
+    ) %>%
+      config(displayModeBar = FALSE)
+  
+    
+  })
 }
+
+
 
 shinyApp(ui = ui, server = server)
 
