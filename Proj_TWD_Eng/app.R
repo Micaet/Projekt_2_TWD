@@ -146,7 +146,8 @@ ui <- navbarPage(
              tags$link(type="text/css", rel = "stylesheet", href = "fonts.css"),
              tags$link(type="text/css", rel = "stylesheet", href = "styles.css"),
              
-             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'large'),
+             add_text_decorator("This scatterplot shows the number of pings, which are a communication tool that allows players to quickly and effectively inform their 
+                                teammates about different situations in the game, without the need to type in the chat, in relation to win rate.", decorator = 'large'),
 
              fluidRow(
                column(3, align = "center",
@@ -158,7 +159,7 @@ ui <- navbarPage(
                )
              ),
              
-             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'small'),
+             add_text_decorator("This barplot shows the win rate in relation to the date. Next to it, there is a piechart representing the win rate within the given time range.", decorator = 'small'),
               
              fluidRow(
                column(9,
@@ -172,7 +173,9 @@ ui <- navbarPage(
     ),
     
     tabPanel("Number of games",
-             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'large'),
+             add_text_decorator("A barplot showing the number of games played with specific champions, broken down by the roles in which each champion was played. 
+                                There are about 150 champions in the game, and each one can be assigned to a specific type. It's important to analyze which types 
+                                of champions they fit best.", decorator = 'large'),
              
              fluidRow(
                column(3, align = "center",
@@ -181,14 +184,14 @@ ui <- navbarPage(
                column(9, apply_spinner("BarPlotChampion")),
              ),
 
-             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'small'),
+             add_text_decorator("A barplot showing the number of games played in relation to the date.", decorator = 'small'),
 
              fluidRow(
                column(12, apply_spinner("BarPlotGames"))
              )
     ),
     tabPanel("Detailed stats",
-             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'large'),
+             add_text_decorator("This density plot shows 3 statistics for each player: Game duration, Damage per minute, and Gold per minute.", decorator = 'large'),
              
              fluidRow(
                column(6, align = "center",
@@ -218,7 +221,7 @@ ui <- navbarPage(
              )
            ),
            
-             add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'small'),
+             add_text_decorator("This heatmap shows the number of games played in relation to the week of the year.", decorator = 'small'),
              
              fluidRow(
               column(10, apply_spinner("Heatmap", height = "600px")
@@ -234,7 +237,8 @@ ui <- navbarPage(
              )
     ),
   tabPanel("To be done",
-           add_text_decorator(paste(rep("Some description", 12), collapse = " "), decorator = 'large'),
+           add_text_decorator("This chart shows the number and details of events that took place during the game. It represents the map 
+                              in League of Legends, with dots marking the events that occurred, such as kills, assists, and deaths.", decorator = 'large'),
            
            # fluidRow(
            #   column(6, align = "center",
@@ -274,10 +278,11 @@ ui <- navbarPage(
                   Authors: MB, RC, MS
                 </p>
                 <p class='text-left' style='font-size:20px; color:#f0e6d2; font-family:Beaufort; margin:10px;'>
-                  Some description Some description Some description Some description Some description
-                  Some description Some description Some description Some description Some description 
-                  Some description Some description Some description Some description Some description
-                  Some description Some description Some description Some description Some description
+                The project aimed to use the Riot Games API to analyze data from our League of Legends games and compare them to the 
+                performance of one of the top players in the world. We wanted to assess our performance, such as how many games we win 
+                versus how many we lose, how our in-game behavior affects our win rate, and also identify which champions we perform well 
+                with and which ones we need to improve on. The entire project was driven by our curiosity and desire to become better at LoL, 
+                and the skills we developed in data analysis enabled us to do so.
                 </p>
                 <p class='text-center' style='font-size:16px; color:#c89b3c; font-family:Beaufort;'>
                   Source of data:
@@ -489,7 +494,7 @@ server <- function(input, output,session) {
     )
     pie_chart <- plot_ly(pie_data, labels = ~status, values = ~proportion, type = 'pie',
                          textinfo = 'label+percent', hoverinfo = 'label+percent', 
-                         marker = list(colors = c("#3cb371", "#ff6347"))) %>% #jasny szary, złoty
+                         marker = list(colors = c("#D4AF37", "#D9D9D9"))) %>% #jasny szary, złoty
       layout(
         title = list(
           text = paste("Win rate: ", round(winrate * 100, 2), "%"),
