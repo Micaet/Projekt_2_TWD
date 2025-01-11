@@ -367,7 +367,7 @@ server <- function(input, output,session) {
     total_games <- sum(data$n)
     plot <- ggplot(data |> rename(`Number of games` = n), aes(x = Date, y = `Number of games`)) +
       geom_col(fill = choose_colour(input$dataset2)) +
-      coord_cartesian(ylim = c(0, 16))
+      coord_cartesian(ylim = c(0, 16)) +scale_y_continuous(expand = c(0, 0)) 
     plot<- add_custom_theme(plot,"Date","Number of games",
                            paste("Games per day       ", "             Total number of games:", total_games))
     
@@ -418,7 +418,7 @@ server <- function(input, output,session) {
                                            "<br>Position:", Position))) +
       geom_col() +
       scale_fill_manual(values = position_colors, name = "Position") +
-      coord_flip(ylim = c(0, 43))
+      coord_flip(ylim = c(0, 43))+scale_y_discrete(expand = c(0, 0)) 
     
     plot2 <- add_custom_theme(
       plot2, 
@@ -463,6 +463,7 @@ server <- function(input, output,session) {
     geom_col(fill = choose_colour(input$dataset1)) +
       coord_cartesian(ylim = c(0, 1))
     plot3<- add_custom_theme(plot3,"Day","Win rate","Win rate in each day")
+    plot3 <- plot3 + scale_y_continuous(expand = c(0,0))
     plot <- ggplotly(plot3,tooltip = 
                        "text")
     change_plotly_labels(plot)
@@ -659,6 +660,7 @@ server <- function(input, output,session) {
       coord_cartesian(xlim = c(0, 50), ylim = c(0, 0.07))
     plot9 <- add_custom_theme(plot9, x = "Game Duration", y = "Density", "Game Duration Density",
                               angle = 0, if_legend = T)
+    plot9<- plot9 + scale_y_continuous(expand=c(0,0))
     plot <- ggplotly(plot9, tooltip = c("x", "color"))
     change_plotly_labels(plot)
   }) 
@@ -677,7 +679,7 @@ server <- function(input, output,session) {
       #scale_color_manual(values = choose_colour2(input$players)) +
     plot7 <- add_custom_theme(plot7, x = "Gold Per Minute", y = "Density", "Gold Per Minute Density", 
                               angle = 0, if_legend = T)
-   
+    plot7<- plot7 + scale_y_continuous(expand=c(0,0))
     plot <- ggplotly(plot7,tooltip = c("x", "color"))
     change_plotly_labels(plot)
   })
@@ -696,7 +698,7 @@ server <- function(input, output,session) {
       #scale_color_manual(values = choose_colour2(input$players)) +
     plot8 <- add_custom_theme(plot8, x = "Damage Per Minute", y = "Density", "Damage Per Minute Density", 
                               angle = 0, if_legend = T)
-    
+    plot8<- plot8 + scale_y_continuous(expand=c(0,0))
     plot <- ggplotly(plot8,tooltip = c("x", "color"))
     change_plotly_labels(plot)
     
@@ -749,8 +751,8 @@ server <- function(input, output,session) {
           color ="#c8aa6e"
         )
       )
-    ) %>%
-      config(displayModeBar = FALSE)
+    ) %>%    config(displayModeBar = FALSE)
+
   
     
   })
