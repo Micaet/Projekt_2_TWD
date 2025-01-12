@@ -236,13 +236,39 @@ ui <- navbarPage(
                   )
              )
     ),
-  tabPanel("To be done",
-           add_text_decorator("This chart shows the number and details of events that took place during the game. It represents the map 
-                              in League of Legends, with dots marking the events that occurred, such as kills, assists, and deaths.", decorator = 'large'),
-           fluidRow(
-             column(12, apply_spinner("MapPlot", height = "512px")
-             ),
-           
+  tabPanel(
+    "To be done",
+    add_text_decorator("This chart shows the number and details of events that took place during the game. It represents the map 
+                        in League of Legends, with dots marking the events that occurred, such as kills, assists, and deaths.", decorator = 'large'),
+    fluidRow(
+      column(12,
+             # Inputs on top
+             fluidRow(
+               column(6, 
+                      selectInput(
+                        "playerSelect", 
+                        "Select Player:", 
+                        choices = c("Player1", "Player2", "ProPlayer"),
+                        selected = "Player1"
+                      )
+               ),
+               column(6,
+                      checkboxGroupInput(
+                        "typeFilter",
+                        "Select Event Types:",
+                        choices = c("assist", "death", "kill"),
+                        selected = c("assist", "death", "kill") # Default selection
+                      )
+               )
+             )
+      )
+    ),
+    fluidRow(
+      # Plot below
+      column(12, apply_spinner("MapPlot", height = "512px"))
+    )
+  
+),
            # fluidRow(
            #   column(6, align = "center",
            #          tags$div(
@@ -269,8 +295,8 @@ ui <- navbarPage(
            #          uiOutput("dynamicPlot") # Dynamic UI for the selected plot
            #   )
            # )
-  ))
-  ,#"#c89b3c", bg_color = "#f0e6d2"
+  
+  #"#c89b3c", bg_color = "#f0e6d2"
   footer = shiny::HTML("
                 <footer class='text-center text-sm-start' style='width:100%;'>
                 <hr>
@@ -704,17 +730,38 @@ server <- function(input, output,session) {
     
   })
   output$MapPlot <- renderPlotly({
-    data <- read.csv("Bottom_matches.csv")
+    # Select the dataset based on the chosen player
+    data <- switch(
+      input$playerSelect,
+      "Player1" = read.csv("Utility_matches.csv"),
+      "Player2" = read.csv("Bottom_matches.csv"),
+      "ProPlayer" = read.csv("Utility_matches_pro.csv")
+    )
     
-    plot <- data %>% plot_ly(
+    # Filter data based on selected event types
+    filtered_data <- data %>%
+      filter(type %in% input$typeFilter) %>%
+      mutate(
+        # Replace x > 13450 with 13425
+        x = ifelse(x > 13450, 13350, x),
+        y=ifelse(y>13600, 13150,y),
+        # Map colors explicitly for each type
+        color = case_when(
+          type == "assist" ~ "blue",
+          type == "kill" ~ "green",
+          type == "death" ~ "red"
+        )
+      )
+    
+    plot <- plot_ly(
+      data = filtered_data,
       x = ~x,
       y = ~y,
       type = "scatter",
       mode = "markers",
-      color = ~type,
-      size = 3,
-      height = 420,
-      width = 500
+      marker = list(color = ~color, size = 10), # Use mapped colors
+      height = 400,
+      width = 400
     ) %>% layout(
       images = list(
         source = base64enc::dataURI(file = "./www/map11.png"),
@@ -734,7 +781,7 @@ server <- function(input, output,session) {
         title = '',
         showgrid = FALSE,
         showticklabels = FALSE,
-        range(0, 14000),
+        range = c(0, 14000),
         tickfont = list(color = 'rgba(0,0,0,0)'),
         linecolor = 'rgba(0,0,0,0)'
       ),
@@ -742,19 +789,18 @@ server <- function(input, output,session) {
         title = '',
         showgrid = FALSE,
         showticklabels = FALSE,
-        range(0, 14000),
+        range = c(0, 14000),
         tickfont = list(color = 'rgba(0,0,0,0)'),
         linecolor = 'rgba(0,0,0,0)'
       ),
       legend = list(
         font = list(
-          color ="#c8aa6e"
+          color = "#c8aa6e"
         )
       )
-    ) %>%    config(displayModeBar = FALSE)
+    ) %>% config(displayModeBar = FALSE)
 
-  
-    
+    return(plot)
   })
 }
 
