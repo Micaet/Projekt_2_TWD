@@ -238,8 +238,11 @@ ui <- navbarPage(
     ),
   tabPanel(
     "To be done",
-    add_text_decorator("This chart shows the number and details of events that took place during the game. It represents the map 
-                        in League of Legends, with dots marking the events that occurred, such as kills, assists, and deaths.", decorator = 'large'),
+    add_text_decorator(
+      "This chart shows the number and details of events that took place during the game. It represents the map 
+    in League of Legends, with dots marking the events that occurred, such as kills, assists, and deaths.", 
+      decorator = 'large'
+    ),
     fluidRow(
       column(12,
              # Inputs on top
@@ -253,22 +256,31 @@ ui <- navbarPage(
                       )
                ),
                column(6,
-                      checkboxGroupInput(
-                        "typeFilter",
-                        "Select Event Types:",
-                        choices = c("assist", "death", "kill"),
-                        selected = c("assist", "death", "kill") # Default selection
+                      tags$div(
+                        class = "custom-checkbox",
+                        checkboxGroupInput(
+                          inputId = "typeFilter",
+                          label = "Event types:",
+                          choices = c("assist", "kill", "death"),
+                          selected = c("assist", "kill", "death")
+                        )
                       )
                )
              )
       )
     ),
     fluidRow(
-      # Plot below
-      column(12, apply_spinner("MapPlot", height = "512px"))
+      # Two-column layout for image and plot
+      column(4, 
+             # Dynamic text and image for selected player
+             uiOutput("playerHeader"),  # Dynamic header
+             uiOutput("playerImage")    # Dynamic image
+      ),
+      column(8, 
+             apply_spinner("MapPlot", height = "512px")
+      )
     )
-  
-),
+  ),
            # fluidRow(
            #   column(6, align = "center",
            #          tags$div(
@@ -802,6 +814,28 @@ server <- function(input, output,session) {
 
     return(plot)
   })
+  player_images <- list(
+    Player1 = "champions/Rakan_0.jpg",
+    Player2 = "champions/Xayah_0.jpg",
+    ProPlayer = "champions/Lulu_0.jpg"
+  )
+  
+
+  output$playerImage <- renderUI({
+    selected_image <- player_images[[input$playerSelect]]
+    tags$img(src = selected_image, width = "100%", height = "auto")
+  })
+  player_headers <- list(
+    Player1 = "Games played on Rakan",
+    Player2 = "Games played on Xayah",
+    ProPlayer = "Games played on Lulu"
+  )
+
+  output$playerHeader <- renderUI({
+    selected_header <- player_headers[[input$playerSelect]] 
+    tags$h4(selected_header, style = "color: #FFD700;") 
+  })
+  
 }
 
 
