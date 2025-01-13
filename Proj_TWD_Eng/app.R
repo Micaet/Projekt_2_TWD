@@ -237,7 +237,7 @@ ui <- navbarPage(
              )
     ),
   tabPanel(
-    "To be done",
+    "Events on map",
     add_text_decorator(
       "This chart shows the number and details of events that took place during the game. It represents the map 
     in League of Legends, with dots marking the events that occurred, such as kills, assists, and deaths.", 
@@ -247,7 +247,7 @@ ui <- navbarPage(
       column(12,
              # Inputs on top
              fluidRow(
-               column(6, 
+               column(6, align = "center",
                       selectInput(
                         "playerSelect", 
                         "Select Player:", 
@@ -255,7 +255,7 @@ ui <- navbarPage(
                         selected = "Player1"
                       )
                ),
-               column(6,
+               column(6,align="center",
                       tags$div(
                         class = "custom-checkbox",
                         checkboxGroupInput(
@@ -271,12 +271,12 @@ ui <- navbarPage(
     ),
     fluidRow(
       # Two-column layout for image and plot
-      column(4, 
+      column(4, align="center", offset = 1,
              # Dynamic text and image for selected player
              uiOutput("playerHeader"),  # Dynamic header
              uiOutput("playerImage")    # Dynamic image
       ),
-      column(8, 
+      column(7, 
              apply_spinner("MapPlot", height = "512px")
       )
     )
@@ -488,7 +488,7 @@ server <- function(input, output,session) {
       summarise(
         total_matches = n(),
         wins = sum(win, na.rm = TRUE),
-        win_ratio = wins / total_matches,
+        win_ratio = wins / total_matches*100,
         .groups = "drop"
       )
     return(data)
@@ -497,9 +497,9 @@ server <- function(input, output,session) {
   output$BarPlotWinRate <- renderPlotly({
     data <- BarPlotWinRateData()
     plot3 <- ggplot(data, aes(x = Day, y = win_ratio,
-    text = paste("Date:", as.character(Day), "<br>Win rate:", round(win_ratio*100,2),"%")))+
+    text = paste("Date:", as.character(Day), "<br>Win rate:", round(win_ratio,2),"%")))+
     geom_col(fill = choose_colour(input$dataset1)) +
-      coord_cartesian(ylim = c(0, 1))
+      coord_cartesian(ylim = c(0, 100))
     plot3<- add_custom_theme(plot3,"Day","Win rate","Win rate in each day")
     plot3 <- plot3 + scale_y_continuous(expand = c(0,0))
     plot <- ggplotly(plot3,tooltip = 
@@ -568,7 +568,7 @@ server <- function(input, output,session) {
       reframe(
         total_matches = n(),
         wins = sum(win, na.rm = TRUE),
-        win_ratio = wins / total_matches,
+        win_ratio = wins / total_matches*100,
         .groups = "drop"
       )
     return(data)
@@ -578,9 +578,9 @@ server <- function(input, output,session) {
     data <- ScatterPlotPingsData()
     
     plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio,
-                              text=paste("Number of pings:", Pings_group, "<br>Win rate:", round(win_ratio*100,2),"%"))) +
+                              text=paste("Number of pings:", Pings_group, "<br>Win rate:", round(win_ratio,2),"%"))) +
     geom_point(color = choose_colour(input$dataset1)) +
-      coord_cartesian(ylim = c(0, 1))
+      coord_cartesian(ylim = c(0, 100))
     plot5<- add_custom_theme(plot5,"Number of pings","Win rate","Win rate by number of pings")
     
     plot <- ggplotly(plot5,tooltip = "text")
@@ -714,7 +714,6 @@ server <- function(input, output,session) {
       geom_density(alpha = 0.4) + 
       scale_fill_manual(values = choose_colour2(input$players)) +
       coord_cartesian(xlim = c(0, 1000), ylim = c(0, 0.008))
-      #scale_color_manual(values = choose_colour2(input$players)) +
     plot7 <- add_custom_theme(plot7, x = "Gold Per Minute", y = "Density", "Gold Per Minute Density", 
                               angle = 0, if_legend = T)
     plot7<- plot7 + scale_y_continuous(expand=c(0,0))
@@ -733,7 +732,6 @@ server <- function(input, output,session) {
       geom_density(alpha = 0.4) + 
       scale_fill_manual(values = choose_colour2(input$players)) +
       coord_cartesian(xlim = c(0, 3000), ylim = c(0, 0.0025))
-      #scale_color_manual(values = choose_colour2(input$players)) +
     plot8 <- add_custom_theme(plot8, x = "Damage Per Minute", y = "Density", "Damage Per Minute Density", 
                               angle = 0, if_legend = T)
     plot8<- plot8 + scale_y_continuous(expand=c(0,0))
@@ -742,7 +740,6 @@ server <- function(input, output,session) {
     
   })
   output$MapPlot <- renderPlotly({
-    # Select the dataset based on the chosen player
     data <- switch(
       input$playerSelect,
       "Player1" = read.csv("Utility_matches.csv"),
@@ -750,30 +747,35 @@ server <- function(input, output,session) {
       "ProPlayer" = read.csv("Utility_matches_pro.csv")
     )
     
-    # Filter data based on selected event types
+    player_colors <- ifelse(
+      input$playerSelect == "Player1", "#005b92", 
+      ifelse(input$playerSelect == "Player2", "#be1e37", "#4F6F49")
+    )
+    
     filtered_data <- data %>%
       filter(type %in% input$typeFilter) %>%
       mutate(
-        # Replace x > 13450 with 13425
         x = ifelse(x > 13450, 13350, x),
-        y=ifelse(y>13600, 13150,y),
-        # Map colors explicitly for each type
-        color = case_when(
-          type == "assist" ~ "blue",
-          type == "kill" ~ "green",
-          type == "death" ~ "red"
+        y = ifelse(y > 13600, 13150, y),
+        shape = case_when(
+          type == "assist" ~ 6, 
+          type == "kill" ~ 0,    
+          type == "death" ~ 4    
         )
       )
-    
     plot <- plot_ly(
       data = filtered_data,
       x = ~x,
       y = ~y,
       type = "scatter",
       mode = "markers",
-      marker = list(color = ~color, size = 10), # Use mapped colors
-      height = 400,
-      width = 400
+      marker = list(
+        color = player_colors,  
+        symbol = ~shape,       
+        size = 15
+      ),
+      height = 550,
+      width = 550
     ) %>% layout(
       images = list(
         source = base64enc::dataURI(file = "./www/map11.png"),
@@ -810,31 +812,39 @@ server <- function(input, output,session) {
           color = "#c8aa6e"
         )
       )
-    ) %>% config(displayModeBar = FALSE)
-
+    ) %>% config(displayModeBar = FALSE, staticPlot = TRUE)
+    
+    
+    
+    
     return(plot)
   })
+  
   player_images <- list(
-    Player1 = "champions/Rakan_0.jpg",
-    Player2 = "champions/Xayah_0.jpg",
-    ProPlayer = "champions/Lulu_0.jpg"
+    Player1 = c("champions/Zilean_0.jpg","champions/Rakan_0.jpg"),
+    Player2 = c("champions/Xayah_0.jpg", "champions/Caitlyn_0.jpg"),
+    ProPlayer = c("champions/Lulu_0.jpg", "champions/Renata_0.jpg")
   )
   
-
-  output$playerImage <- renderUI({
-    selected_image <- player_images[[input$playerSelect]]
-    tags$img(src = selected_image, width = "100%", height = "auto")
-  })
   player_headers <- list(
-    Player1 = "Games played on Rakan",
-    Player2 = "Games played on Xayah",
-    ProPlayer = "Games played on Lulu"
+    Player1 = "Games played on Rakan and Zilean",
+    Player2 = "Games played on Xayah and Caitlyn",
+    ProPlayer = "Games played on Lulu and Renata"
   )
-
+  
+  output$playerImage <- renderUI({
+    selected_images <- player_images[[input$playerSelect]]
+    tagList(
+      lapply(selected_images, function(img) {
+        tags$img(src = img, width = "auto", height = "500")
+      })
+    )
+  })
+  
   output$playerHeader <- renderUI({
     selected_header <- player_headers[[input$playerSelect]] 
     tags$h4(selected_header, style = "color: #FFD700;") 
-  })
+  })  
   
 }
 
