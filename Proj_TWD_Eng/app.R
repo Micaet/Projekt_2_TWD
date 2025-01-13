@@ -245,7 +245,6 @@ ui <- navbarPage(
     ),
     fluidRow(
       column(12,
-             # Inputs on top
              fluidRow(
                column(6, align = "center",
                       selectInput(
@@ -270,11 +269,9 @@ ui <- navbarPage(
       )
     ),
     fluidRow(
-      # Two-column layout for image and plot
       column(4, align="center", offset = 1,
-             # Dynamic text and image for selected player
-             uiOutput("playerHeader"),  # Dynamic header
-             uiOutput("playerImage")    # Dynamic image
+             uiOutput("playerHeader"),  
+             uiOutput("playerImage")  
       ),
       column(7, 
              apply_spinner("MapPlot", height = "512px")
@@ -525,7 +522,7 @@ server <- function(input, output,session) {
     return(data)
   })
   
-  output$PieChartWinRate <- renderPlotly({ #skala na y % 
+  output$PieChartWinRate <- renderPlotly({ 
     data <- PieChartWinRateData()
     winrate <- data$winrate + 0.1 
     lose_rate <- 1 - winrate
@@ -536,7 +533,7 @@ server <- function(input, output,session) {
     )
     pie_chart <- plot_ly(pie_data, labels = ~status, values = ~proportion, type = 'pie',
                          textinfo = 'label+percent', hoverinfo = 'label+percent', 
-                         marker = list(colors = c("#D4AF37", "#D9D9D9"))) %>% #jasny szary, złoty
+                         marker = list(colors = c("#D4AF37", "#D9D9D9"))) %>% 
       layout(
         title = list(
           text = paste("Win rate: ", round(winrate * 100, 2), "%"),
