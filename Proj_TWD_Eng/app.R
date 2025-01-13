@@ -261,8 +261,8 @@ ui <- navbarPage(
                         checkboxGroupInput(
                           inputId = "typeFilter",
                           label = "Event types:",
-                          choices = c("assist", "kill", "death"),
-                          selected = c("assist", "kill", "death")
+                          choices = c("assist (triangle)", "kill (circle)", "death (cross)"),
+                          selected = c("assist (triangle)", "kill (circle)", "death (cross)")
                         )
                       )
                )
@@ -753,14 +753,21 @@ server <- function(input, output,session) {
     )
     
     filtered_data <- data %>%
+      mutate(
+        type = case_when(
+          type == "assist" ~ "assist (triangle)",  
+          type == "kill" ~ "kill (circle)",      
+          type == "death" ~ "death (cross)"  
+        )
+      ) %>%
       filter(type %in% input$typeFilter) %>%
       mutate(
-        x = ifelse(x > 13450, 13350, x),
+        x = ifelse(x > 13450, 13350, x),  
         y = ifelse(y > 13600, 13150, y),
         shape = case_when(
-          type == "assist" ~ 6, 
-          type == "kill" ~ 0,    
-          type == "death" ~ 4    
+          type == "assist (triangle)" ~ 6,  
+          type == "kill (circle)" ~ 0,   
+          type == "death (cross)" ~ 4  
         )
       )
     plot <- plot_ly(
