@@ -173,9 +173,7 @@ ui <- navbarPage(
     ),
     
     tabPanel("Number of games",
-             add_text_decorator("The barplot showing the number of games played with specific champions, broken down by the roles in which each champion was played. 
-                                There are about 150 champions in the game, and each one can be assigned to a specific type. It's important to analyze which types 
-                                of champions they fit best.", decorator = 'large'),
+             add_text_decorator("The barplot shows the number of games played with specific champions, broken down by the roles in which each champion was played. There are about 150 champions in the game, and each can be assigned to a specific role. It's important to analyze which types of champions are most frequently chosen by players.\n To make the plot easier to read, we only show champions that players have played more than 3 games with.", decorator = 'large'),
              
              fluidRow(
                column(3, align = "center",
@@ -184,14 +182,14 @@ ui <- navbarPage(
                column(9, apply_spinner("BarPlotChampion")),
              ),
 
-             add_text_decorator("A barplot showing the number of games played in relation to the date.", decorator = 'small'),
+             add_text_decorator("The barplot shows the number of games played each day of the year, highlighting trends in game activity. It provides a clear overview of how often games are played over time. As you can see, we always play League when it's possible.", decorator = 'small'),
 
              fluidRow(
                column(12, apply_spinner("BarPlotGames"))
              )
     ),
     tabPanel("Detailed stats",
-             add_text_decorator("Undermentioned density plot depicts three statistics for each player: game duration, damage per minute, and gold per minute.", decorator = 'large'),
+             add_text_decorator("Undermentioned density plot depicts three statistics that show each player's game performance. We have chosen game duration, damage per minute, and gold per minute.", decorator = 'large'),
              
              fluidRow(
                column(6, align = "center",
@@ -221,7 +219,8 @@ ui <- navbarPage(
              )
            ),
            
-             add_text_decorator("The heatmap shows the number of games played in relation to the week of the year.", decorator = 'small'),
+             add_text_decorator("The heatmap shows the number of games played in relation to the week of the year and day of the week.
+                                Plot shows data from the beginning of September until the end of the year.", decorator = 'small'),
              
              fluidRow(
               column(10, apply_spinner("Heatmap", height = "600px")
@@ -424,7 +423,7 @@ server <- function(input, output,session) {
     data <- data %>% 
       filter_data(input$date_range2, input$position2) %>%
       count(Champion, Position) %>% 
-      filter(n >2)%>%
+      filter(n >3)%>%
       filter(!(Champion == "Vladimir") )
     return(data)
   })
@@ -748,8 +747,8 @@ server <- function(input, output,session) {
     )
     
     player_colors <- ifelse(
-      input$playerSelect == "Player1", "#005b92", 
-      ifelse(input$playerSelect == "Player2", "#be1e37", "#4F6F49")
+      input$playerSelect == "Player1", "#003d66", 
+      ifelse(input$playerSelect == "Player2", "#be1e37", "#6a7f45")
     )
     
     filtered_data <- data %>%
@@ -777,12 +776,16 @@ server <- function(input, output,session) {
       type = "scatter",
       mode = "markers",
       marker = list(
-        color = player_colors,  
-        symbol = ~shape,       
-        size = 15
+        color = player_colors,      
+        symbol = ~shape,           
+        size = 15,                  
+        line = list(
+          color = 'black',         
+          width = 2                 
+        )
       ),
-      height = 550,
-      width = 550
+      height = 590,
+      width = 590
     ) %>% layout(
       images = list(
         source = base64enc::dataURI(file = "./www/map11.png"),
@@ -821,11 +824,9 @@ server <- function(input, output,session) {
       )
     ) %>% config(displayModeBar = FALSE, staticPlot = TRUE)
     
-    
-    
-    
     return(plot)
-  })
+    
+})
   
   player_images <- list(
     Player1 = c("champions/Zilean_0.jpg","champions/Rakan_0.jpg"),
