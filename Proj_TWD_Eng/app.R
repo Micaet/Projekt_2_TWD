@@ -143,11 +143,11 @@ ui <- navbarPage(
              tags$link(rel = "icon", href = "favicon.png"),
              tags$div(class = "slider-custom"),
              tags$div(class = "custom-checkbox"),
-             tags$link(type="text/css", rel = "stylesheet", href = "fonts.css"),
-             tags$link(type="text/css", rel = "stylesheet", href = "styles.css"),
+             tags$link(type="text/css", rel = "stylesheet", href = "custom_font_family.css"),
+             tags$link(type="text/css", rel = "stylesheet", href = "custom_style.css"),
              
-             add_text_decorator("This scatterplot shows the number of pings, which are a communication tool that allows players to quickly and effectively inform their 
-                                teammates about different situations in the game, without the need to type in the chat, in relation to win rate.", decorator = 'large'),
+             add_text_decorator("The scatterplot shows win rate in relation to the number of pings, which are a communication tool that allows players to quickly and effectively inform their 
+                                teammates about different situations in the game, without the need to type in the chat.", decorator = 'large'),
 
              fluidRow(
                column(3, align = "center",
@@ -159,7 +159,7 @@ ui <- navbarPage(
                )
              ),
              
-             add_text_decorator("This barplot shows the win rate in relation to the date. Next to it, there is a piechart representing the win rate within the given time range.", decorator = 'small'),
+             add_text_decorator("Undermentioned barplot depicts the win rate in a given day. Next to it, there is a piechart representing the win rate within the certain time range.", decorator = 'small'),
               
              fluidRow(
                column(9,
@@ -173,7 +173,7 @@ ui <- navbarPage(
     ),
     
     tabPanel("Number of games",
-             add_text_decorator("A barplot showing the number of games played with specific champions, broken down by the roles in which each champion was played. 
+             add_text_decorator("The barplot showing the number of games played with specific champions, broken down by the roles in which each champion was played. 
                                 There are about 150 champions in the game, and each one can be assigned to a specific type. It's important to analyze which types 
                                 of champions they fit best.", decorator = 'large'),
              
@@ -191,7 +191,7 @@ ui <- navbarPage(
              )
     ),
     tabPanel("Detailed stats",
-             add_text_decorator("This density plot shows 3 statistics for each player: Game duration, Damage per minute, and Gold per minute.", decorator = 'large'),
+             add_text_decorator("Undermentioned density plot depicts three statistics for each player: game duration, damage per minute, and gold per minute.", decorator = 'large'),
              
              fluidRow(
                column(6, align = "center",
@@ -221,7 +221,7 @@ ui <- navbarPage(
              )
            ),
            
-             add_text_decorator("This heatmap shows the number of games played in relation to the week of the year.", decorator = 'small'),
+             add_text_decorator("The heatmap shows the number of games played in relation to the week of the year.", decorator = 'small'),
              
              fluidRow(
               column(10, apply_spinner("Heatmap", height = "600px")
@@ -240,7 +240,8 @@ ui <- navbarPage(
     "Events on map",
     add_text_decorator(
       "This chart shows the number and details of events that took place during the game. It represents the map 
-    in League of Legends, with dots marking the events that occurred, such as kills, assists, and deaths.", 
+    in League of Legends, with symbols marking the events that occurred, triangles for assists, circles for kills 
+      and crosses for deaths respectively.", 
       decorator = 'large'
     ),
     fluidRow(
@@ -453,7 +454,8 @@ server <- function(input, output,session) {
                                            "<br>Position:", Position))) +
       geom_col() +
       scale_fill_manual(values = position_colors, name = "Position") +
-      coord_flip(ylim = c(0, 43))+scale_y_discrete(expand = c(0, 0)) 
+      scale_x_discrete(expand = c(0, 0)) +
+      coord_flip(ylim = c(0, 43), expand = F)
     
     plot2 <- add_custom_theme(
       plot2, 
@@ -498,7 +500,7 @@ server <- function(input, output,session) {
     geom_col(fill = choose_colour(input$dataset1)) +
       coord_cartesian(ylim = c(0, 100))
     plot3<- add_custom_theme(plot3,"Day","Win rate","Win rate in each day")
-    plot3 <- plot3 + scale_y_continuous(expand = c(0,0))
+    plot3 <- plot3 + scale_y_continuous(expand = c(0,0), labels= (\(x) paste(as.character(x),"%") ))
     plot <- ggplotly(plot3,tooltip = 
                        "text")
     change_plotly_labels(plot)
@@ -574,9 +576,10 @@ server <- function(input, output,session) {
   output$ScatterPlotPings <- renderPlotly({
     data <- ScatterPlotPingsData()
     
-    plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio,
+    plot5 <- ggplot(data, aes(x = Pings_group, y = win_ratio, size = 3,
                               text=paste("Number of pings:", Pings_group, "<br>Win rate:", round(win_ratio,2),"%"))) +
     geom_point(color = choose_colour(input$dataset1)) +
+      scale_y_continuous(labels= (\(x) paste(as.character(x),"%") )) +
       coord_cartesian(ylim = c(0, 100))
     plot5<- add_custom_theme(plot5,"Number of pings","Win rate","Win rate by number of pings")
     
@@ -830,10 +833,11 @@ server <- function(input, output,session) {
     ProPlayer = c("champions/Lulu_0.jpg", "champions/Renata_0.jpg")
   )
   
+  first_part = "Games played on Champions "
   player_headers <- list(
-    Player1 = "Games played on Rakan and Zilean",
-    Player2 = "Games played on Xayah and Caitlyn",
-    ProPlayer = "Games played on Lulu and Renata"
+    Player1 = paste(first_part, "Rakan and Zilean"),
+    Player2 = paste(first_part, "on Xayah and Caitlyn"),
+    ProPlayer = paste(first_part, "on Lulu and Renata")
   )
   
   output$playerImage <- renderUI({
