@@ -182,7 +182,7 @@ ui <- navbarPage(
                column(9, apply_spinner("BarPlotChampion")),
              ),
 
-             add_text_decorator("The barplot shows the number of games played each day of the year, highlighting trends in game activity. It provides a clear overview of how often games are played over time. As you can see, we always play League when it's possible.", decorator = 'small'),
+             add_text_decorator("The barplot shows the number of games played each day of the year, highlighting trends in game activity. It provides a clear overview of how many games are played over time, focusing only on the days when we actually played any games. As you can see, we always play League when it's possible.", decorator = 'small'),
 
              fluidRow(
                column(12, apply_spinner("BarPlotGames"))
