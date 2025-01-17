@@ -9,7 +9,6 @@ library(ggrepel)
 library(shinycssloaders)
 library(forcats)
 
-
 choose_colour <- function(input) {
   c("#181d24","#f7bb45", "#c89b3c", "#f0e6d2", "#fc6a53", "#be1e37")
   ifelse(input == "Player1", "#005b92", 
@@ -159,7 +158,7 @@ ui <- navbarPage(
                )
              ),
              
-             add_text_decorator("Undermentioned barplot depicts the win rate in a given day. Next to it, there is a piechart representing the win rate within the certain time range.", decorator = 'small'),
+             add_text_decorator("Undermentioned barplot depicts the win rate in a given day, showing only days with at least one game. Next to it, there is a piechart representing the win rate within the certain time range.", decorator = 'small'),
               
              fluidRow(
                column(9,
@@ -215,7 +214,7 @@ ui <- navbarPage(
              
              fluidRow(
               column(12,
-                    uiOutput("dynamicPlot") # Dynamic UI for the selected plot
+                    uiOutput("dynamicPlot")
              )
            ),
            
@@ -278,34 +277,6 @@ ui <- navbarPage(
       )
     )
   ),
-           # fluidRow(
-           #   column(6, align = "center",
-           #          tags$div(
-           #            class = "custom-checkbox",
-           #            checkboxGroupInput(
-           #              inputId = "players",
-           #              label = "Select Players:",
-           #              choices = c("Player1", "Player2", "ProPlayer"),
-           #              selected = c("Player1")
-           #            )
-           #          )
-           #     ),
-           #   column(6, align = "center",
-           #          selectInput(
-           #            inputId = "plotChoice",
-           #            label = "Choose density plot:",
-           #            choices = c("Game Duration", "Damage per minute", "Gold per minute"),
-           #            selected = "DensityDuration"
-           #          )
-           #   )
-           #         ),
-           # fluidRow(
-           #   column(12,
-           #          uiOutput("dynamicPlot") # Dynamic UI for the selected plot
-           #   )
-           # )
-  
-  #"#c89b3c", bg_color = "#f0e6d2"
   footer = shiny::HTML("
                 <footer class='text-center text-sm-start' style='width:100%;'>
                 <hr>
@@ -328,14 +299,11 @@ ui <- navbarPage(
                 </p>
                 </footer>
               "),
-  #header = tags$head(tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"))
-    
-  #)
 )
 
 
 server <- function(input, output,session) {
-### Kod do wyświietlania ograniczonego dla ProPlayer
+### Kod do wyświetlania ograniczonego dla ProPlayer
   observe({
     for (i in 1:2) {
       dataset_input <- paste0("dataset", i)
@@ -366,6 +334,44 @@ server <- function(input, output,session) {
         )
       })
     })
+  })
+  observe({
+    sliders <- list("date_range1", "date_range2")  
+    for (slider in sliders) {
+      range <- input[[slider]]
+      if (as.Date(range[1]) <= as.Date("2024-10-06") && as.Date(range[1]) >= as.Date("2024-09-29")) {
+        new_start <- as.Date("2024-09-25")
+        updateSliderInput(
+          session,
+          inputId = slider,
+          value = c(new_start, range[2])
+          
+        )
+        output[[paste0(slider, "_warning")]] <- renderText({
+          "Wybrano zakres bez danych, wybieram poprawny"
+        })}
+      
+      if (as.numeric(diff(range)) < 6) {
+        output[[paste0(slider, "_warning")]] <- renderText({
+          "Wybrano zakres bez danych, wybieram poprawny"
+        })
+        if (as.Date(range[1]) >= as.Date("2024-12-27")) {
+          new_start <- as.Date(range[1]) - 6
+          updateSliderInput(
+            session,
+            inputId = slider,
+            value = c(new_start, range[2])
+          )
+         
+        } else {
+          updateSliderInput(
+            session,
+            inputId = slider,
+            value = c(range[1], range[1] + 6)
+          )
+        }
+      }
+    }
   })
 
 #### Wyświetlanie 1 z trzech
@@ -648,12 +654,6 @@ server <- function(input, output,session) {
     
     plot <- ggplotly(heat_map)
     change_plotly_labels(plot)
-    
-    # heatmap <- ggplot(data, aes(week, factor(weekday_number), fill = game_count)) +
-    #   geom_tile() + 
-    #   scale_fill_gradient(low = "#e9e6d2", high = choose_colour(input$dataset3), limits = c(0,16)) +
-    #   scale_y_discrete(labels = c("Mon", "Tues", "Wen", "Thurs", "Fri", "Sat", "Sun"))
-    # add_custom_theme(heatmap, "Week", "Day of week", "Number of games heatmap")
   }) |>
     bindCache(input$dataset3, input$date_range3, input$position3)
   
