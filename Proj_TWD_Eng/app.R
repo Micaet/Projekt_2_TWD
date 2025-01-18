@@ -158,7 +158,7 @@ ui <- navbarPage(
                )
              ),
              
-             add_text_decorator("Undermentioned barplot depicts the win rate in a given day, showing only days with at least one game. Next to it, there is a piechart representing the win rate within the certain time range.", decorator = 'small'),
+             add_text_decorator("Undermentioned barplot depicts the win rate in a given day, showing only days with at least one game played. Next to it, there is a piechart representing the win rate within the certain time range.", decorator = 'small'),
               
              fluidRow(
                column(9,
@@ -339,7 +339,7 @@ server <- function(input, output,session) {
     sliders <- list("date_range1", "date_range2")  
     for (slider in sliders) {
       range <- input[[slider]]
-      if (as.Date(range[1]) <= as.Date("2024-10-06") && as.Date(range[1]) >= as.Date("2024-09-29")) {
+      if (as.Date(range[1]) <= as.Date("2024-10-11") && as.Date(range[1]) >= as.Date("2024-09-29")) {
         new_start <- as.Date("2024-09-25")
         updateSliderInput(
           session,
@@ -347,14 +347,9 @@ server <- function(input, output,session) {
           value = c(new_start, range[2])
           
         )
-        output[[paste0(slider, "_warning")]] <- renderText({
-          "Wybrano zakres bez danych, wybieram poprawny"
-        })}
+       }
       
       if (as.numeric(diff(range)) < 6) {
-        output[[paste0(slider, "_warning")]] <- renderText({
-          "Wybrano zakres bez danych, wybieram poprawny"
-        })
         if (as.Date(range[1]) >= as.Date("2024-12-27")) {
           new_start <- as.Date(range[1]) - 6
           updateSliderInput(
