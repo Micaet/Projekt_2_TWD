@@ -8,7 +8,7 @@ library(tidyr)
 library(ggrepel)
 library(shinycssloaders)
 library(forcats)
-
+library(htmlwidgets)
 choose_colour <- function(input) {
   c("#181d24","#f7bb45", "#c89b3c", "#f0e6d2", "#fc6a53", "#be1e37")
   ifelse(input == "Player1", "#005b92", 
@@ -406,7 +406,7 @@ server <- function(input, output,session) {
     total_games <- sum(data$n)
     plot <- ggplot(data |> rename(`Number of games` = n), aes(x = Date, y = `Number of games`)) +
       geom_col(fill = choose_colour(input$dataset2)) +
-      coord_cartesian(ylim = c(0, 16)) +scale_y_continuous(expand = c(0, 0)) 
+      coord_cartesian(ylim = c(0, 21)) +scale_y_continuous(expand = c(0, 0)) 
     plot<- add_custom_theme(plot,"Date","Number of games",
                            paste("Games per day       ", "             Total number of games:", total_games))
     
@@ -652,7 +652,7 @@ server <- function(input, output,session) {
     
     heat_map <- heatmaply(
       data_matrix,
-      limits = c(0, 16),
+      limits = c(0, 22),
       xlab = "Week",
       ylab = "Day of week",
       main = "Number of games heatmap",
@@ -668,7 +668,7 @@ server <- function(input, output,session) {
     )
     
     plot <- ggplotly(heat_map)
-    change_plotly_labels(plot)
+    plot<-change_plotly_labels(plot)
   }) |>
     bindCache(input$dataset3, input$date_range3, input$position3)
   
