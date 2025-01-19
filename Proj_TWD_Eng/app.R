@@ -12,7 +12,7 @@ library(forcats)
 choose_colour <- function(input) {
   c("#181d24","#f7bb45", "#c89b3c", "#f0e6d2", "#fc6a53", "#be1e37")
   ifelse(input == "Player1", "#005b92", 
-         ifelse(input == "Player2", "#be1e37", "#4F6F49")) #    "#f7bb45", "#c89b3c" - naj "#f0e6d2" - tło
+         ifelse(input == "Player2", "#be1e37", "#4F6F49")) 
 } 
   
 choose_colour2 <- function(selected_players) {
@@ -41,7 +41,6 @@ filter_data <- function(df, date_range, position_filter) {
 
 add_custom_theme <- function(plot, x_label = NULL, y_label = NULL, plot_title = NULL, 
                              color = "#c89b3c", angle = 45, if_legend = F) {
-  #add_legend <- ifelse(legend, element_text(size = 12, colour = color), element_blank())
   plot <- plot + 
     theme_minimal() + 
     theme(
@@ -658,15 +657,13 @@ server <- function(input, output,session) {
       ylab = "Day of week",
       main = "Number of games heatmap",
       dendrogram = "none",
-      #scale_fill = "Viridis",
       colors = list("#e9e6d2",choose_colour(input$dataset3)),
       showticklabels = c(TRUE, TRUE),
       labRow = c("Mon", "Tues", "Wen", "Thurs", "Fri", "Sat", "Sun"),
-      #color = c("white", "red"),
       grid_color = "black",
       heatmap_layers = theme(
         legend.background = element_rect(fill = "#181d24"),
-        legend.text = element_text(color = "#f0e6d2") #"#c89b3c")
+        legend.text = element_text(color = "#f0e6d2")
       )
     )
     
@@ -847,9 +844,9 @@ server <- function(input, output,session) {
 })
   
   player_images <- list(
-    Player1 = c("champions/Zilean_0.jpg","champions/Rakan_0.jpg"),
-    Player2 = c("champions/Xayah_0.jpg", "champions/Caitlyn_0.jpg"),
-    ProPlayer = c("champions/Lulu_0.jpg", "champions/Renata_0.jpg")
+    Player1 = c("Zilean_0.jpg","Rakan_0.jpg"),
+    Player2 = c("Xayah_0.jpg", "Caitlyn_0.jpg"),
+    ProPlayer = c("Lulu_0.jpg", "Renata_0.jpg")
   )
   
   first_part = "Games played on Champions "
