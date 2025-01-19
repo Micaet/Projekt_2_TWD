@@ -335,39 +335,39 @@ server <- function(input, output,session) {
       })
     })
   })
-  observe({
-    sliders <- list("date_range1", "date_range2")  
-    for (slider in sliders) {
-      range <- input[[slider]]
-      if (as.Date(range[1]) <= as.Date("2024-10-11") && as.Date(range[1]) >= as.Date("2024-09-29")) {
-        new_start <- as.Date("2024-09-25")
-        updateSliderInput(
-          session,
-          inputId = slider,
-          value = c(new_start, range[2])
-          
-        )
-       }
-      
-      if (as.numeric(diff(range)) < 6) {
-        if (as.Date(range[1]) >= as.Date("2024-12-27")) {
-          new_start <- as.Date(range[1]) - 6
-          updateSliderInput(
-            session,
-            inputId = slider,
-            value = c(new_start, range[2])
-          )
-         
-        } else {
-          updateSliderInput(
-            session,
-            inputId = slider,
-            value = c(range[1], range[1] + 6)
-          )
-        }
-      }
-    }
-  })
+  # observe({
+  #   sliders <- list("date_range1", "date_range2")  
+  #   for (slider in sliders) {
+  #     range <- input[[slider]]
+  #     if (as.Date(range[1]) <= as.Date("2024-10-11") && as.Date(range[1]) >= as.Date("2024-09-29")) {
+  #       new_start <- as.Date("2024-09-25")
+  #       updateSliderInput(
+  #         session,
+  #         inputId = slider,
+  #         value = c(new_start, range[2])
+  #         
+  #       )
+  #      }
+  #     
+  #     if (as.numeric(diff(range)) < 10) {
+  #       if (as.Date(range[1]) >= as.Date("2024-12-20")) {
+  #         new_start <- as.Date("2024-12-21")    # as.Date(range[1]) - 6
+  #         updateSliderInput(
+  #           session,
+  #           inputId = slider,
+  #           value = c(new_start, range[2])
+  #         )
+  #        
+  #       } else {
+  #         updateSliderInput(
+  #           session,
+  #           inputId = slider,
+  #           value = c(range[1], range[1] + 6)
+  #         )
+  #       }
+  #     }
+  #   }
+  # })
 
 #### Wyświetlanie 1 z trzech
   output$dynamicPlot <- renderUI({
@@ -386,7 +386,11 @@ server <- function(input, output,session) {
   BarPlotGamesData <- reactive({
     nazwa_csv <- paste0(input$dataset2,".csv")
     data <- read.csv(nazwa_csv)
-    data <- data %>% filter_data(input$date_range2,input$position2) %>%
+    data <- data %>% filter_data(input$date_range2,input$position2) 
+    validate(
+      need(nrow(data) >  0 , "        There is no data available in chosen date range. Please change it.")
+    )
+    data <- data %>%
       mutate(
         year = as.numeric(format(as.POSIXct(Date), "%Y")),
         month = as.numeric(format(as.POSIXct(Date), "%m")),
@@ -422,10 +426,17 @@ server <- function(input, output,session) {
     nazwa_csv <- paste0(input$dataset2, ".csv")
     data <- read.csv(nazwa_csv)
     data <- data %>% 
-      filter_data(input$date_range2, input$position2) %>%
+      filter_data(input$date_range2, input$position2) 
+    validate(
+      need(nrow(data) >  0 , "        There is no data available in chosen date range. Please change it.")
+    )
+    data <- data %>%
       count(Champion, Position) %>% 
       filter(n >3)%>%
       filter(!(Champion == "Vladimir") )
+    validate(
+      need(nrow(data) >  0 , "        There is no champion used more than 3 times in chosen date range. Please change it.")
+    )
     return(data)
   })
   
@@ -482,7 +493,11 @@ server <- function(input, output,session) {
         Day = format(as.POSIXct(Date), "%m-%d"),
         win = ifelse(Win == "True", 1, 0)
       ) %>%
-      filter_data(input$date_range1, input$position1) %>%
+      filter_data(input$date_range1, input$position1) 
+    validate(
+      need(nrow(data) >  0 , "        There is no data available in chosen date range. Please change it.")
+    )
+    data <- data %>%
       group_by(Day) %>%
       summarise(
         total_matches = n(),
@@ -515,7 +530,11 @@ server <- function(input, output,session) {
       mutate(
         win = ifelse(Win == "True", 1, 0),
         Date = as.POSIXct(Date, format = "%Y-%m-%d")
-      ) %>% filter_data(input$date_range1,input$position1)%>%
+      ) %>% filter_data(input$date_range1,input$position1)
+    validate(
+      need(nrow(data) >  0 , "        There is no data available in chosen date range. Please change it.")
+    )
+    data <- data %>%
       reframe(
         total_matches = n(),
         wins = sum(win, na.rm = TRUE),
@@ -554,7 +573,11 @@ server <- function(input, output,session) {
         Date = format(as.POSIXct(Date), "%Y-%m-%d", tz = "UTC"),
         Day = format(as.POSIXct(Date), "%m-%d", tz = "UTC"),
         win = ifelse(Win == "True", 1, 0)
-      )%>% filter_data(input$date_range1,input$position1) %>%
+      )%>% filter_data(input$date_range1,input$position1) 
+    validate(
+      need(nrow(data) >  0 , "        There is no data available in chosen date range. Please change it.")
+    )
+    data <- data %>%
       mutate(Pings = allInPings + assistMePings + commandPings + enemyMissingPings + 
                enemyVisionPings + getBackPings + needVisionPings + onMyWayPings + pushPings + visionClearedPings) %>%
       mutate(Pings_group = cut(Pings, 
