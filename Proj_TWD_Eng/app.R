@@ -23,6 +23,14 @@ choose_colour2 <- function(selected_players) {
   )
   return(colors[selected_players])
 }
+choose_colour3 <- function(selected_players) {
+  colors <- c(
+    Player1 = "#003e66",  
+    Player2 = "#9d142d",   
+    Proplayer = "#3c5639"
+  )
+  return(colors[selected_players])
+}
 
 filter_data <- function(df, date_range, position_filter) {
   if (is.null(position_filter) || length(position_filter) == 0) {
@@ -403,23 +411,39 @@ server <- function(input, output,session) {
   
   output$BarPlotGames <- renderPlotly({
     data <- BarPlotGamesData()
-    total_games <- sum(data$n)
-    plot <- ggplot(data |> rename(`Number of games` = n), aes(x = Date, y = `Number of games`)) +
-      geom_col(fill = choose_colour(input$dataset2)) +
-      coord_cartesian(ylim = c(0, 21)) +scale_y_continuous(expand = c(0, 0)) 
-    plot<- add_custom_theme(plot,"Date","Number of games",
-                           paste("Games per day       ", "             Total number of games:", total_games))
+    total_games <- sum(data$n) #
+    days_with_games <- sum(data$n > 0)
     
+    plot <- ggplot(data |> rename(`Number of games` = n), aes(x = Date, y = `Number of games`)) +
+      labs(x= "Date (with at least game)")+
+      geom_col(fill = choose_colour(input$dataset2)) +
+      coord_cartesian(ylim = c(0, 21)) +
+      scale_y_continuous(expand = c(0, 0))
+    
+    plot <- add_custom_theme(
+      plot,
+      "Date",
+      "Number of games",
+      paste("Games per day       ", 
+            "             Total number of games:", total_games,
+            "             Days with games:", days_with_games)
+    )
+  
     plot <- ggplotly(plot)
     plot <- plot |>
       layout(title = list(
         text = paste0('Games per day',
                       '<br>',
                       '<sup>',
-                      'Total number of games: ', total_games ,'</sup>')))
+                      'Total number of games: ', total_games,
+                      ' | Days with games: ', days_with_games, '</sup>')
+      ),
+      xaxis = list(title = "Day (with at least one game)"))
+    
     change_plotly_labels(plot)
-  }) |>
+  }) |> 
     bindCache(input$dataset2, input$date_range2, input$position2)
+  
   
   BarPlotChampionData <- reactive({
     nazwa_csv <- paste0(input$dataset2, ".csv")
@@ -477,6 +501,10 @@ server <- function(input, output,session) {
     
     plot <- ggplotly(plot2, tooltip = "text")
     
+    
+    plot <- ggplotly(plot)
+ 
+    
     change_plotly_labels(plot)
   }) |>
     bindCache(input$dataset2, input$date_range2, input$position2)
@@ -517,6 +545,8 @@ server <- function(input, output,session) {
     plot3 <- plot3 + scale_y_continuous(expand = c(0,0), labels= (\(x) paste(as.character(x),"%") ))
     plot <- ggplotly(plot3,tooltip = 
                        "text")
+    plot <- plot |>
+      layout( xaxis = list(title = "Day (with at least one game)"))
     change_plotly_labels(plot)
     
   }) |>
@@ -558,7 +588,7 @@ server <- function(input, output,session) {
         title = list(
           text = paste("Win rate: ", round(winrate * 100, 2), "%"),
           font = list(size = 16)  
-        ))
+        ),  showlegend = FALSE)
     
     change_plotly_labels(pie_chart)
   }) |>
@@ -630,42 +660,53 @@ server <- function(input, output,session) {
   })
   
   output$Heatmap <- renderPlotly({
-    data <- HeatmapData()
-    data <- data %>%
-      mutate(weekday_number = case_when(
-        weekday == "poniedziałek" ~ 0,
-        weekday == "wtorek" ~ 1,
-        weekday == "środa" ~ 2,
-        weekday == "czwartek" ~ 3,
-        weekday == "piątek" ~ 4,
-        weekday == "sobota" ~ 5,
-        weekday == "niedziela" ~ 6
-      ))
+    data <- HeatmapData() %>%
+      mutate(
+        weekday_number = case_when(
+          weekday == "poniedziałek" ~ 0,
+          weekday == "wtorek" ~ 1,
+          weekday == "środa" ~ 2,
+          weekday == "czwartek" ~ 3,
+          weekday == "piątek" ~ 4,
+          weekday == "sobota" ~ 5,
+          weekday == "niedziela" ~ 6
+        )
+      )
     data_aggregated <- data %>%
       group_by(weekday_number, week) %>%
-      summarise(game_count = sum(game_count), .groups = "drop")
-
+      summarise(game_count = sum(game_count), .groups = "drop") %>%
+      complete(
+        weekday_number = 0:6,
+        week = 35:52, 
+        fill = list(game_count = 0)
+      )
+    data_aggregated <- data_aggregated %>%
+      filter(week >= 35 & week <= 52)
     data_matrix <- data_aggregated %>%
-      spread(key = week, value = game_count, fill = 0)
-
-    data_matrix <- as.matrix(data_matrix[, -1])
-    
+      spread(key = week, value = game_count, fill = 0) %>%
+      arrange(weekday_number) %>%
+      select(-weekday_number) %>% 
+      as.matrix()
+    num_weeks <- ncol(data_matrix)
+    labCol <- paste(35:(34 + num_weeks))
     heat_map <- heatmaply(
       data_matrix,
       limits = c(0, 22),
-      xlab = "Week",
+      xlab = "Week number",
       ylab = "Day of week",
       main = "Number of games heatmap",
       dendrogram = "none",
-      colors = list("#e9e6d2",choose_colour(input$dataset3)),
+      colors = list("#e9e6d2", choose_colour3(input$dataset3)),
       showticklabels = c(TRUE, TRUE),
-      labRow = c("Mon", "Tues", "Wen", "Thurs", "Fri", "Sat", "Sun"),
+      labRow = c("Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"),
+      labCol = labCol, 
       grid_color = "black",
       heatmap_layers = theme(
         legend.background = element_rect(fill = "#181d24"),
         legend.text = element_text(color = "#f0e6d2")
       )
     )
+    
     
     plot <- ggplotly(heat_map)
     plot<-change_plotly_labels(plot)
@@ -705,7 +746,7 @@ server <- function(input, output,session) {
     }
   
     
-    plot9 <- ggplot(data, aes(x = gameLength, color = Player, fill = Player)) +
+    plot9 <- ggplot(data, aes(x = gameLength, fill = Player)) +
       geom_density(alpha = 0.4) +  
       scale_fill_manual(values = choose_colour2(input$players)) +
     #scale_color_manual(values = choose_colour2(input$players))+
@@ -724,7 +765,7 @@ server <- function(input, output,session) {
       return(NULL)
     }
     
-    plot7 <- ggplot(data, aes(x = goldPerMinute, color = Player, fill = Player)) +
+    plot7 <- ggplot(data, aes(x = goldPerMinute, fill = Player)) +
       geom_density(alpha = 0.4) + 
       scale_fill_manual(values = choose_colour2(input$players)) +
       coord_cartesian(xlim = c(0, 1000), ylim = c(0, 0.008))
@@ -742,7 +783,7 @@ server <- function(input, output,session) {
       return(NULL)
     }
     
-    plot8 <- ggplot(data, aes(x = damagePerMinute, color = Player, fill = Player)) +
+    plot8 <- ggplot(data, aes(x = damagePerMinute, fill = Player)) +
       geom_density(alpha = 0.4) + 
       scale_fill_manual(values = choose_colour2(input$players)) +
       coord_cartesian(xlim = c(0, 3000), ylim = c(0, 0.0025))
