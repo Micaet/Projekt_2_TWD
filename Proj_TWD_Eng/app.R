@@ -115,7 +115,6 @@ apply_spinner <- function(plot_name, spinner_type = 1, colour = "#f0e6d2", heigh
   shinycssloaders::withSpinner(plotlyOutput(plot_name, height = height),
                                image = list(src = "load01.gif"),
                                caption = "PLEASE WAIT",
-                               #type = getOption("spinner.type", default = spinner_type),
                                color = getOption("spinner.color", default = colour),
                                size = getOption("spinner.size", default = 0.75)
                                )
@@ -140,7 +139,7 @@ add_text_decorator <- function(text_before = NULL, text_after = NULL, decorator)
 
 
 ui <- navbarPage(
-  title = tags$div(class = "app-title", span(img(src = "favicon.png")), 'eague of Stats'), #titlePanel("League of Stats"),
+  title = tags$div(class = "app-title", span(img(src = "favicon.png")), 'eague of Stats'),
     #header =  tags$head(  
     #),
   
@@ -161,7 +160,7 @@ ui <- navbarPage(
                ),
              
                column(9,
-                      apply_spinner("ScatterPlotPings") # '#73ea13')
+                      apply_spinner("ScatterPlotPings") 
                )
              ),
              
@@ -169,11 +168,11 @@ ui <- navbarPage(
               
              fluidRow(
                column(9,
-                      apply_spinner("BarPlotWinRate") # 'blue')
+                      apply_spinner("BarPlotWinRate") 
                       ),
              
                column(3, 
-                      apply_spinner("PieChartWinRate") # 'orange')
+                      apply_spinner("PieChartWinRate") 
                       )
              )
     ),
@@ -342,40 +341,6 @@ server <- function(input, output,session) {
       })
     })
   })
-  # observe({
-  #   sliders <- list("date_range1", "date_range2")  
-  #   for (slider in sliders) {
-  #     range <- input[[slider]]
-  #     if (as.Date(range[1]) <= as.Date("2024-10-11") && as.Date(range[1]) >= as.Date("2024-09-29")) {
-  #       new_start <- as.Date("2024-09-25")
-  #       updateSliderInput(
-  #         session,
-  #         inputId = slider,
-  #         value = c(new_start, range[2])
-  #         
-  #       )
-  #      }
-  #     
-  #     if (as.numeric(diff(range)) < 10) {
-  #       if (as.Date(range[1]) >= as.Date("2024-12-20")) {
-  #         new_start <- as.Date("2024-12-21")    # as.Date(range[1]) - 6
-  #         updateSliderInput(
-  #           session,
-  #           inputId = slider,
-  #           value = c(new_start, range[2])
-  #         )
-  #        
-  #       } else {
-  #         updateSliderInput(
-  #           session,
-  #           inputId = slider,
-  #           value = c(range[1], range[1] + 6)
-  #         )
-  #       }
-  #     }
-  #   }
-  # })
-
 #### Wyświetlanie 1 z trzech
   output$dynamicPlot <- renderUI({
     selected_plot <- input$plotChoice
@@ -749,7 +714,6 @@ server <- function(input, output,session) {
     plot9 <- ggplot(data, aes(x = gameLength, fill = Player)) +
       geom_density(alpha = 0.4) +  
       scale_fill_manual(values = choose_colour2(input$players)) +
-    #scale_color_manual(values = choose_colour2(input$players))+
       coord_cartesian(xlim = c(0, 50), ylim = c(0, 0.07))
     plot9 <- add_custom_theme(plot9, x = "Game Duration", y = "Density", "Game Duration Density",
                               angle = 0, if_legend = T)
