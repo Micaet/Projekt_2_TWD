@@ -16,20 +16,20 @@ The dashboard consists of four main tabs:
 4. **Events on map**  
    Features a map indicating the locations of key events from recent games.
 
-The rich variety of charts and the ability to filter data by date range or position allow for a precise understanding of player statistics. Furthermore, the comparison with a professional player reveals the differences between a seasoned professional and someone playing for fun.
+The wide variety of charts and the ability to filter data by date range or position allow for a precise understanding of player statistics. Furthermore, the comparison with a professional player reveals the differences between a seasoned professional and someone playing for fun.
 
 ---
 
-We are providing a link to our application; however, due to issues with the `heatmaply` package on shinyapps, heatmap chart does not function correctly. It works perfectly when you download and run our code locally, so we encourage you to do so.  
+We are providing a link to our application. However, the heatmap chart does not function correctly due to issues with the `heatmaply` package on ShinyApps. It works perfectly when you download and run our code locally, so we encourage you to do so.  
 Link: https://micaet.shinyapps.io/proj_twd_eng/   
 Additionally, below are several screenshots of our application, including an image of the heatmap:
 - **Win rate tab**: upper part of first tab 
   ![First Tab](./Image/First.png)
 
-- **Events on map tab**: Last tab  
+- **Events on map tab**: Tab with map plot 
   ![ProMap Tab](./Image/ProMap.png)
 
-- **Heatmap**: Heatmap for advanced data visualization (not working on internet version) 
+- **Heatmap**: Heatmap for advanced data visualization (not working on the internet version) 
   ![Heatmap Tab](./Image/HeatMap.png)
 
 - **Density plot**: A density plot highlighting key performance distributions  
