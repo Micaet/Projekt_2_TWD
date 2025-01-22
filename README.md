@@ -20,11 +20,12 @@ The rich variety of charts and the ability to filter data by date range or posit
 
 ---
 
-Z uwagi na brak dobrego wyświetlania pakietu heatmaply w shinyapps, nie udostępniamy nie w pełni działającego produktu jako linku. Poniżej znajdują się przykładowe screeny wyglądu aplikacji:
+Due to limitations in displaying the `heatmaply` package on shinyapps, we are not providing a link to the partially functioning product. We encourage you to run the application on your own computer to experience its full functionality. Below are example screenshots showcasing the application:
 
-- **First**: Pierwsza zakładka
-![First Tab](./Image/First.png)
+- **First**: The first tab  
+  ![First Tab](./Image/First.png)
 
-- **ProMap**: Zakładka z mapą
-![ProMap Tab](./Image/ProMap.png)
+- **ProMap**: The map tab  
+  ![ProMap Tab](./Image/ProMap.png)
+
 
