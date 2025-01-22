@@ -20,15 +20,16 @@ The rich variety of charts and the ability to filter data by date range or posit
 
 ---
 
-We are providing a link to our application; however, due to issues with the `heatmaply` package on shinyapps, one chart does not function correctly. It works perfectly when you download and run our code locally, so we encourage you to do so. Additionally, below are several screenshots of our application, including an image of the heatmap:
-
+We are providing a link to our application; however, due to issues with the `heatmaply` package on shinyapps, one chart does not function correctly. It works perfectly when you download and run our code locally, so we encourage you to do so.
+Link: https://micaet.shinyapps.io/proj_twd_eng/https://micaet.shinyapps.io/proj_twd_eng/
+Additionally, below are several screenshots of our application, including an image of the heatmap:
 - **First**: The first tab  
   ![First Tab](./Image/First.png)
 
 - **ProMap**: The map tab  
   ![ProMap Tab](./Image/ProMap.png)
 
-- **Heatmap**: A tab displaying heatmaps for advanced data visualization  
+- **Heatmap**: A tab displaying heatmaps for advanced data visualization (not worrking on internet version) 
   ![Heatmap Tab](./Image/HeatMap.png)
 
 - **Density**: A density plot highlighting key performance distributions  
