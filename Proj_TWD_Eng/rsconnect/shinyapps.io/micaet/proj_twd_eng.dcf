@@ -5,6 +5,8 @@ account: micaet
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13755058
-bundleId: 9668701
+bundleId: 9684698
 url: https://micaet.shinyapps.io/proj_twd_eng/
 version: 1
+asMultiple: FALSE
+asStatic: FALSE
