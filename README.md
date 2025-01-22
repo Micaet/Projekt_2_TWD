@@ -4,16 +4,16 @@ League of Stats is a project that provides insights into your performance in Lea
 
 The dashboard consists of four main tabs:
 
-1. **Win Rate**  
+1. **Win rate**  
    Displays the percentage of games won by players, analyzed across various variables.
 
-2. **Number of Games**  
+2. **Number of games**  
    Shows the total number of matches played.
 
-3. **Detailed Stats**  
+3. **Detailed stats**  
    Highlights interesting performance-related statistics for players.
 
-4. **Events on Map**  
+4. **Events on map**  
    Features a map indicating the locations of key events from recent games.
 
 The rich variety of charts and the ability to filter data by date range or position allow for a precise understanding of player statistics. Furthermore, the comparison with a professional player reveals the differences between a seasoned professional and someone playing for fun.
