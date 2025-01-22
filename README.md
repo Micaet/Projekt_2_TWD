@@ -1,4 +1,4 @@
-# League of Stats
+### League of Stats
 
 League of Stats is a project that provides insights into your performance in League of Legends from September 1st to December 30th, 2024. The application presents meaningful and easy-to-understand statistics regarding your gameplay over several months. Additionally, for comparison, it includes data from a professional player.
 
@@ -20,7 +20,7 @@ The rich variety of charts and the ability to filter data by date range or posit
 
 ---
 
-Due to limitations in displaying the `heatmaply` package on shinyapps, we are not providing a link to the partially functioning product. We encourage you to run the application on your own computer to experience its full functionality. Below are example screenshots showcasing the application:
+We are providing a link to our application; however, due to issues with the `heatmaply` package on shinyapps, one chart does not function correctly. It works perfectly when you download and run our code locally, so we encourage you to do so. Additionally, below are several screenshots of our application, including an image of the heatmap:
 
 - **First**: The first tab  
   ![First Tab](./Image/First.png)
@@ -28,4 +28,11 @@ Due to limitations in displaying the `heatmaply` package on shinyapps, we are no
 - **ProMap**: The map tab  
   ![ProMap Tab](./Image/ProMap.png)
 
+- **Heatmap**: A tab displaying heatmaps for advanced data visualization  
+  ![Heatmap Tab](./Image/Heatmap.png)
+
+- **Density**: A density plot highlighting key performance distributions  
+  ![Density Tab](./Image/Density.png)
+
+---
 
