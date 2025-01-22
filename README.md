@@ -21,7 +21,7 @@ The wide variety of charts and the ability to filter data by date range or posit
 ---
 
 We are providing a link to our application. However, the heatmap chart does not function correctly due to issues with the `heatmaply` package on ShinyApps. It works perfectly when you download and run our code locally, so we encourage you to do so.  
-Link: https://micaet.shinyapps.io/proj_twd_eng/   
+Link: https://micaet.shinyapps.io/proj_twd_eng/ (appearance may vary depending on the browser)   
 Additionally, below are several screenshots of our application, including an image of the heatmap:
 - **Win rate tab**: upper part of first tab 
   ![First Tab](./Image/First.png)
