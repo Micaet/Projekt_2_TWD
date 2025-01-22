@@ -18,3 +18,13 @@ The dashboard consists of four main tabs:
 
 The rich variety of charts and the ability to filter data by date range or position allow for a precise understanding of player statistics. Furthermore, the comparison with a professional player reveals the differences between a seasoned professional and someone playing for fun.
 
+---
+
+Z uwagi na brak dobrego wyświetlania pakietu heatmaply w shinyapps, nie udostępniamy nie w pełni działającego produktu jako linku. Poniżej znajdują się przykładowe screeny wyglądu aplikacji:
+
+- **First**: Pierwsza zakładka
+![First Tab](./Image/First.png)
+
+- **ProMap**: Zakładka z mapą
+![ProMap Tab](./Image/ProMap.png)
+
