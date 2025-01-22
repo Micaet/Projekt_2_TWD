@@ -19,7 +19,7 @@ choose_colour2 <- function(selected_players) {
   colors <- c(
     Player1 = "#005b92",
     Player2 = "#be1e37",
-    ProPlayer = "#4F6F49"
+    Proplayer = "#4F6F49"
   )
   return(colors[selected_players])
 }
@@ -140,10 +140,6 @@ add_text_decorator <- function(text_before = NULL, text_after = NULL, decorator)
 
 ui <- navbarPage(
   title = tags$div(class = "app-title", span(img(src = "favicon.png")), 'eague of Stats'),
-    #header =  tags$head(  
-    #),
-  
-  #tabsetPanel(
     tabPanel("Win rate",
              tags$link(rel = "icon", href = "favicon.png"),
              tags$div(class = "slider-custom"),
@@ -203,7 +199,7 @@ ui <- navbarPage(
                         checkboxGroupInput(
                           inputId = "players",
                           label = "Select Players:",
-                          choices = c("Player1", "Player2", "ProPlayer"),
+                          choices = c("Player1", "Player2", "Proplayer"),
                           selected = c("Player1")
                         )
                       )
