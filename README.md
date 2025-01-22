@@ -29,7 +29,7 @@ We are providing a link to our application; however, due to issues with the `hea
   ![ProMap Tab](./Image/ProMap.png)
 
 - **Heatmap**: A tab displaying heatmaps for advanced data visualization  
-  ![Heatmap Tab](./Image/Heatmap.png)
+  ![Heatmap Tab](./Image/HeatMap.png)
 
 - **Density**: A density plot highlighting key performance distributions  
   ![Density Tab](./Image/Density.png)
